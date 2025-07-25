@@ -2,6 +2,7 @@ import fs from 'fs-extra';
 import path from 'path';
 import os from 'os';
 import chalk from 'chalk';
+import { createFolder } from './pathUtils.js';
 
 // Configuration file path - shared across the application
 export const CONFIG_PATH = path.join(os.homedir(), '.projecttools', 'config.json');
@@ -58,6 +59,7 @@ export async function initConfig() {
     await fs.ensureDir(path.dirname(CONFIG_PATH));
     
     if (!await fs.pathExists(CONFIG_PATH)) {
+      await createFolder(DEFAULT_CONFIG.settings.defaultProjectsPath);
       await saveConfig(DEFAULT_CONFIG);
       return true;
     }

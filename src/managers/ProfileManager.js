@@ -1,6 +1,7 @@
 import chalk from 'chalk';
 import { generateId, cleanName } from '../utils/commonUtils.js';
 import { loadConfig, saveConfig } from '../utils/configUtils.js';
+import { createFolder } from '../utils/pathUtils.js';
 
 /**
  * ProfileManager - Handles all profile-related operations
@@ -43,6 +44,7 @@ class ProfileManager {
         config.activeProfile = cleanedName;
       }
 
+      await createFolder(`${config.settings.defaultProjectsPath}/${cleanedName}`);
       await saveConfig(config);
 
       return { success: true, isFirstProfile };
