@@ -29,7 +29,7 @@ const workspaceManager = new WorkspaceManager();
 program
   .name('pt')
   .description('ProjectTools - Manage your development projects across workspaces and profiles.')
-  .version('0.1.0');
+  .version('0.1.1');
 
 program
   .command('hello')

@@ -4,7 +4,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Node.js](https://img.shields.io/badge/Node.js->=22.14.0-green.svg)](https://nodejs.org/)
-[![Version](https://img.shields.io/badge/version-0.1.0-blue.svg)](https://github.com/deans-bradley/project-tools)
+[![Version](https://img.shields.io/badge/version-0.1.1-blue.svg)](https://github.com/deans-bradley/project-tools)
 
 ProjectTools (`pt`) is a command-line interface designed to streamline the management of development projects across different workspaces and profiles. Whether you're juggling multiple clients, working on different types of projects, or need to organize your development environment, ProjectTools provides the structure and flexibility you need.
 
@@ -322,7 +322,7 @@ Special thanks to the maintainers and contributors of these projects for making 
 
 ## Changelog
 
-### [0.1.0] - 2025-09-28
+### [0.1.1] - 2025-09-28
 
 #### Added
 - Initial release of ProjectTools CLI
