@@ -20,7 +20,7 @@ class ProfileManager {
       const cleanedName = cleanName(profileName);
       
       if (cleanedName !== profileName.trim().toLowerCase()) {
-        console.log(chalk.yellow(`📝 Profile name cleaned: "${profileName}" → "${cleanedName}"`));
+        console.log(chalk.yellow(`Profile name cleaned: "${profileName}" → "${cleanedName}"`));
       }
 
       const config = await loadConfig();
@@ -64,7 +64,7 @@ class ProfileManager {
         active: profile.name === config.activeProfile
       }));
     } catch (error) {
-      console.error(chalk.red('❌ Error loading profiles:'), error.message);
+      console.error(chalk.red('Error loading profiles:'), error.message);
       return [];
     }
   }

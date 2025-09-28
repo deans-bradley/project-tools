@@ -17,15 +17,15 @@ export function setupProfileCommands(program, profileManager) {
       try {
         const result = await profileManager.addProfile(profileName);
         if (result.success) {
-          console.log(chalk.green(`✅ Profile "${profileName}" created successfully!`));
+          console.log(chalk.green(`Profile "${profileName}" created successfully!`));
           if (result.isFirstProfile) {
-            console.log(chalk.blue(`🎯 "${profileName}" is now your active profile`));
+            console.log(chalk.blue(`"${profileName}" is now your active profile`));
           }
         } else {
-          console.log(chalk.red(`❌ ${result.message}`));
+          console.log(chalk.red(result.message));
         }
       } catch (error) {
-        console.error(chalk.red('❌ Error creating profile:'), error.message);
+        console.error(chalk.red('Error creating profile:'), error.message);
       }
     });
 
@@ -36,9 +36,9 @@ export function setupProfileCommands(program, profileManager) {
       try {
         const profiles = await profileManager.listProfiles();
         if (profiles.length === 0) {
-          console.log(chalk.yellow('📝 No profiles found. Create one with: pt profile add <name>'));
+          console.log(chalk.yellow('No profiles found. Create one with: pt profile add <name>'));
         } else {
-          console.log(chalk.cyan('\n📋 Available Profiles:'));
+          console.log(chalk.cyan('\nAvailable Profiles:'));
           profiles.forEach(profile => {
             const indicator = profile.active ? chalk.green('● (active)') : chalk.gray('○');
             console.log(`  ${indicator} ${profile.name}`);
@@ -46,7 +46,7 @@ export function setupProfileCommands(program, profileManager) {
           console.log('');
         }
       } catch (error) {
-        console.error(chalk.red('❌ Error listing profiles:'), error.message);
+        console.error(chalk.red('Error listing profiles:'), error.message);
       }
     });
 
@@ -58,12 +58,12 @@ export function setupProfileCommands(program, profileManager) {
         const result = await profileManager.switchProfile(profileName);
 
         if (result.success) {
-          console.log(chalk.green(`✅ Switched to profile "${result.profileName}"`));
+          console.log(chalk.green(`Switched to profile "${result.profileName}"`));
         } else {
-          console.log(chalk.red(`❌ ${result.message}`));
+          console.log(chalk.red(result.message));
         }
       } catch (error) {
-        console.error(chalk.red('❌ Error switching profile:'), error.message);
+        console.error(chalk.red('Error switching profile:'), error.message);
       }
     });
 
@@ -74,17 +74,17 @@ export function setupProfileCommands(program, profileManager) {
       try {
         const result = await profileManager.removeProfile(profileName);
         if (result.success) {
-          console.log(chalk.green(`✅ Profile "${result.removedProfile}" removed`));
+          console.log(chalk.green(`Profile "${result.removedProfile}" removed`));
           if (result.activeProfileChanged && result.activeProfile) {
-            console.log(chalk.blue(`🎯 "${result.activeProfile}" is now your active profile`));
+            console.log(chalk.blue(`"${result.activeProfile}" is now your active profile`));
           } else if (result.activeProfileChanged && !result.activeProfile) {
-            console.log(chalk.yellow('📝 No profiles found. Create one with: pt profile add <name>'));
+            console.log(chalk.yellow('No profiles found. Create one with: pt profile add <name>'));
           }
         } else {
-          console.log(chalk.red(`❌ ${result.message}`));
+          console.log(chalk.red(result.message));
         }
       } catch (error) {
-        console.error(chalk.red('❌ Error removing profile:'), error.message);
+        console.error(chalk.red('Error removing profile:'), error.message);
       }
     });
 }

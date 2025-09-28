@@ -35,7 +35,7 @@ program
   .command('hello')
   .description('Test command to verify installation')
   .action(() => {
-    console.log(chalk.green('🎉 ProjectTools is working!'));
+    console.log(chalk.green('ProjectTools is working!'));
     console.log(chalk.blue('Ready to manage your projects with ease!'));
   });
 

@@ -29,7 +29,7 @@ export async function loadConfig() {
     const config = await fs.readJSON(CONFIG_PATH);
     return config;
   } catch (error) {
-    console.error(chalk.red('❌ Error loading configuration:'), error.message);
+    console.error(chalk.red('Error loading configuration:'), error.message);
     return DEFAULT_CONFIG;
   }
 }
@@ -45,7 +45,7 @@ export async function saveConfig(config) {
     await fs.writeJSON(CONFIG_PATH, config, { spaces: 2 });
     return true;
   } catch (error) {
-    console.error(chalk.red('❌ Error saving configuration:'), error.message);
+    console.error(chalk.red('Error saving configuration:'), error.message);
     return false;
   }
 }
@@ -65,7 +65,7 @@ export async function initConfig() {
     }
     return false; 
   } catch (error) {
-    console.error(chalk.red('❌ Error initializing configuration:'), error.message);
+    console.error(chalk.red('Error initializing configuration:'), error.message);
     throw error;
   }
 }

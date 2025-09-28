@@ -14,20 +14,20 @@ class WorkspaceManager {
   async addWorkspace(workspaceName) {
     try {   
       if (!workspaceName || workspaceName.trim() === '') {
-        return { success: false, message: 'workspace name cannot be empty' };
+        return { success: false, message: 'Workspace name cannot be empty' };
       }
 
       const cleanedName = cleanName(workspaceName);
       
       if (cleanedName !== workspaceName.trim().toLowerCase()) {
-        console.log(chalk.yellow(`📝 workspace name cleaned: "${workspaceName}" → "${cleanedName}"`));
+        console.log(chalk.yellow(`Workspace name cleaned: "${workspaceName}" → "${cleanedName}"`));
       }
 
       const config = await loadConfig();
       const existingWorkspace = config.workspaces.find(p => p.name === cleanedName);
 
       if (existingWorkspace) {
-        return { success: false, message: `workspace "${cleanedName}" already exists` };
+        return { success: false, message: `Workspace "${cleanedName}" already exists` };
       }
 
       const newWorkspace = {
@@ -61,16 +61,16 @@ class WorkspaceManager {
       if (showAll) {
         return {
           workspaces: config.workspaces,
-          message: `\n📋 All available workspaces :`
+          message: `\nAll available workspaces :`
         };
       }
 
       return {
         workspaces: config.workspaces.filter(ws => ws.profile === config.activeProfile),
-        message: `\n📋 Available workspaces in ${config.activeProfile} profile:`
+        message: `\nAvailable workspaces in ${config.activeProfile} profile:`
       };
     } catch (error) {
-      console.error(chalk.red('❌ Error loading workspaces:'), error.message);
+      console.error(chalk.red('Error loading workspaces:'), error.message);
       return [];
     }
   }
@@ -85,14 +85,14 @@ class WorkspaceManager {
   async removeWorkspace(workspaceName) {
     try {
       if (!workspaceName || workspaceName.trim() === '') {
-        return { success: false, message: 'workspace name cannot be empty' };
+        return { success: false, message: 'Workspace name cannot be empty' };
       }
 
       const cleanedName = cleanName(workspaceName);
       const config = await loadConfig();
 
       if (!config.workspaces.find(workspace => workspace.name === cleanedName)) {
-        return { success: false, message: `workspace "${cleanedName}" does not exist` };
+        return { success: false, message: `Workspace "${cleanedName}" does not exist` };
       } else {
         const workspaces = config.workspaces;
         const index = workspaces.findIndex(workspaces => workspaces.name === cleanedName);

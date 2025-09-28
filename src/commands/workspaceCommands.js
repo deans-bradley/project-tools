@@ -17,12 +17,12 @@ export function setupWorkspaceCommands(program, workspaceManager) {
       try {
         const result = await workspaceManager.addWorkspace(workspaceName);
         if (result.success) {
-          console.log(chalk.green(`✅ Workspace "${result.workspaceName}" created successfully!`));
+          console.log(chalk.green(`Workspace "${result.workspaceName}" created successfully!`));
         } else {
-          console.log(chalk.red(`❌ ${result.message}`));
+          console.log(chalk.red(result.message));
         }
       } catch (error) {
-        console.error(chalk.red('❌ Error creating workspace:'), error.message);
+        console.error(chalk.red('Error creating workspace:'), error.message);
       }
     });
 
@@ -35,7 +35,7 @@ export function setupWorkspaceCommands(program, workspaceManager) {
         const result = await workspaceManager.listWorkspaces(options.all);
         const workspaces = result.workspaces;
         if (workspaces.length === 0) {
-          console.log(chalk.yellow('📝 No workspaces found. Create one with: pt workspace add <name>'));
+          console.log(chalk.yellow('No workspaces found. Create one with: pt workspace add <name>'));
         } else {
           console.log(chalk.cyan(result.message));
           workspaces.forEach(workspace => {
@@ -44,7 +44,7 @@ export function setupWorkspaceCommands(program, workspaceManager) {
           console.log('');
         }
       } catch (error) {
-        console.error(chalk.red('❌ Error listing workspaces:'), error.message);
+        console.error(chalk.red('Error listing workspaces:'), error.message);
       }
     });
 
@@ -55,12 +55,12 @@ export function setupWorkspaceCommands(program, workspaceManager) {
       try {
         const result = await workspaceManager.removeWorkspace(workspaceName);
         if (result.success) {
-          console.log(chalk.green(`✅ Workspace "${result.removedWorkspace}" removed`));
+          console.log(chalk.green(`Workspace "${result.removedWorkspace}" removed`));
         } else {
-          console.log(chalk.red(`❌ ${result.message}`));
+          console.log(chalk.red(result.message));
         }
       } catch (error) {
-        console.error(chalk.red('❌ Error deleting workspace:'), error.message);
+        console.error(chalk.red('Error deleting workspace:'), error.message);
       }
     });
 }

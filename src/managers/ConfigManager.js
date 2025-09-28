@@ -21,12 +21,12 @@ class ConfigManager {
       
       if (wasCreated) {
         console.log(chalk.yellow('First time setup...'));
-        console.log(chalk.green('✅ Configuration initialized!'));
-        console.log(chalk.blue(`📁 Default projects path: ${path.join(os.homedir(), 'Dev')}`));
+        console.log(chalk.green('Configuration initialized!'));
+        console.log(chalk.blue(`Default projects path: ${path.join(os.homedir(), 'Dev')}`));
         console.log(chalk.gray('   You can change this later with: pt config set default-path <path>'));
       }
     } catch (error) {
-      console.error(chalk.red('❌ Error initializing ProjectTools:'), error.message);
+      console.error(chalk.red('Error initializing ProjectTools:'), error.message);
       process.exit(1);
     }
   }
@@ -57,7 +57,7 @@ class ConfigManager {
       const config = await loadConfig();
       return config.settings?.[key];
     } catch (error) {
-      console.error(chalk.red('❌ Error getting setting:'), error.message);
+      console.error(chalk.red('Error getting setting:'), error.message);
       return null;
     }
   }
