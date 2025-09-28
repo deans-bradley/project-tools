@@ -292,12 +292,6 @@ project-tools/
 └── package.json
 ```
 
-### Dependencies
-
-- **commander**: CLI framework for building command-line interfaces
-- **chalk**: Terminal string styling for colored output
-- **fs-extra**: Enhanced file system operations
-
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
