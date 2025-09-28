@@ -17,7 +17,7 @@ class ConfigManager {
    */
   async init() {
     try {
-      const wasCreated = await initConfig();
+      const wasCreated = initConfig();
       
       if (wasCreated) {
         console.log(chalk.yellow('First time setup...'));
@@ -35,16 +35,16 @@ class ConfigManager {
    * Load configuration from file
    * @returns {Object} Configuration object
    */
-  async loadConfig() {
-    return await loadConfig();
+  loadConfig() {
+    return loadConfig();
   }
 
   /**
    * Save configuration to file
    * @param {Object} config - Configuration object to save
    */
-  async saveConfig(config) {
-    return await saveConfig(config);
+  saveConfig(config) {
+    return saveConfig(config);
   }
 
   /**
@@ -54,7 +54,7 @@ class ConfigManager {
    */
   async getSetting(key) {
     try {
-      const config = await loadConfig();
+      const config = loadConfig();
       return config.settings?.[key];
     } catch (error) {
       console.error(chalk.red('Error getting setting:'), error.message);
@@ -70,7 +70,7 @@ class ConfigManager {
    */
   async setSetting(key, value) {
     try {
-      const config = await loadConfig();
+      const config = loadConfig();
       
       // Ensure settings object exists
       if (!config.settings) {
@@ -78,7 +78,7 @@ class ConfigManager {
       }
       
       config.settings[key] = value;
-      const success = await saveConfig(config);
+      const success = saveConfig(config);
       
       return { success };
     } catch (error) {
@@ -110,7 +110,7 @@ class ConfigManager {
       // Ensure the directory exists
       await fs.ensureDir(resolvedPath);
 
-      const result = await this.setSetting('defaultProjectsPath', resolvedPath);
+      const result = this.setSetting('defaultProjectsPath', resolvedPath);
       return result;
     } catch (error) {
       return { success: false, message: error.message };
