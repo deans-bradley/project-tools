@@ -23,7 +23,7 @@ class ProfileManager {
         console.log(chalk.yellow(`Profile name cleaned: "${profileName}" → "${cleanedName}"`));
       }
 
-      const config = await loadConfig();
+      const config = loadConfig();
       const existingProfile = config.profiles.find(p => p.name === cleanedName);
 
       if (existingProfile) {
@@ -43,7 +43,7 @@ class ProfileManager {
         config.activeProfile = cleanedName;
       }
 
-      await saveConfig(config);
+      saveConfig(config);
 
       return { success: true, isFirstProfile };
     } catch (error) {
@@ -57,7 +57,7 @@ class ProfileManager {
    */
   async listProfiles() {
     try {
-      const config = await loadConfig();
+      const config = loadConfig();
       
       return config.profiles.map(profile => ({
         ...profile,
@@ -81,7 +81,7 @@ class ProfileManager {
       }
 
       const cleanedName = cleanName(profileName);
-      const config = await loadConfig();
+      const config = loadConfig();
 
       if (config.activeProfile === cleanedName) {
         return { success: false, message: `Already on profile "${cleanedName}"` };
@@ -89,7 +89,7 @@ class ProfileManager {
         return { success: false, message: `Profile "${cleanedName}" does not exist` };
       } else {
         config.activeProfile = cleanedName;
-        await saveConfig(config);
+        saveConfig(config);
         return { success: true, profileName: cleanedName };
       }
     } catch (error) {
@@ -113,7 +113,7 @@ class ProfileManager {
       let activeProfileChanged = false;
       let activeProfile = null;
       const cleanedName = cleanName(profileName);
-      const config = await loadConfig();
+      const config = loadConfig();
 
       if (!config.profiles.find(profile => profile.name === cleanedName)) {
         return { success: false, message: `Profile "${cleanedName}" does not exist` };
@@ -136,7 +136,7 @@ class ProfileManager {
           }
         }
 
-        await saveConfig(config);
+        saveConfig(config);
 
         return { 
           success: true, 

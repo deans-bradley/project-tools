@@ -23,7 +23,7 @@ class WorkspaceManager {
         console.log(chalk.yellow(`Workspace name cleaned: "${workspaceName}" → "${cleanedName}"`));
       }
 
-      const config = await loadConfig();
+      const config = loadConfig();
       const existingWorkspace = config.workspaces.find(p => p.name === cleanedName);
 
       if (existingWorkspace) {
@@ -38,7 +38,7 @@ class WorkspaceManager {
       };
 
       config.workspaces.push(newWorkspace);
-      await saveConfig(config);
+      saveConfig(config);
 
       return { 
         success: true,
@@ -56,7 +56,7 @@ class WorkspaceManager {
    */
   async listWorkspaces(showAll) {
     try {
-      const config = await loadConfig();
+      const config = loadConfig();
 
       if (showAll) {
         return {
@@ -89,7 +89,7 @@ class WorkspaceManager {
       }
 
       const cleanedName = cleanName(workspaceName);
-      const config = await loadConfig();
+      const config = loadConfig();
 
       if (!config.workspaces.find(workspace => workspace.name === cleanedName)) {
         return { success: false, message: `Workspace "${cleanedName}" does not exist` };
@@ -100,8 +100,7 @@ class WorkspaceManager {
         if (index !== -1) {
           config.workspaces.splice(index, 1);
         }
-
-        await saveConfig(config);
+        saveConfig(config);
 
         return {
           success: true,
