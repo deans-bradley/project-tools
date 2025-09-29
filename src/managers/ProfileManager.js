@@ -1,6 +1,7 @@
 import chalk from 'chalk';
 import { generateId, cleanName } from '../utils/commonUtils.js';
 import { loadConfig, saveConfig } from '../utils/configUtils.js';
+import { Config, Profile } from '../models/index.js';
 
 /**
  * ProfileManager - Handles all profile-related operations
@@ -30,17 +31,16 @@ class ProfileManager {
         return { success: false, message: `Profile "${cleanedName}" already exists` };
       }
 
-      const newProfile = {
+      const newProfile = new Profile({
         id: generateId('prof'),
-        name: cleanedName,
-        created: new Date().toISOString()
-      };
+        name: cleanedName
+      });
 
-      config.profiles.push(newProfile);
+      config.addProfile(newProfile);
       const isFirstProfile = config.profiles.length === 1;
 
       if (isFirstProfile) {
-        config.activeProfile = cleanedName;
+        config.setActiveProfile(cleanedName);
       }
 
       await saveConfig(config);
@@ -53,7 +53,7 @@ class ProfileManager {
 
   /**
    * List all profiles
-   * @returns {Array} Array of profile objects with active status
+   * @returns {Array<Profile>} Array of profile objects with active status
    */
   async listProfiles() {
     try {
@@ -87,7 +87,7 @@ class ProfileManager {
       } else if (!config.profiles.find(profile => profile.name === cleanedName)) {
         return { success: false, message: `Profile "${cleanedName}" does not exist` };
       } else {
-        config.activeProfile = cleanedName;
+        config.setActiveProfile(cleanedName);
         await saveConfig(config);
         return { success: true, profileName: cleanedName };
       }
@@ -96,7 +96,7 @@ class ProfileManager {
     }
   }
 
-  // TODO: The remove command should also remove all child workspaces and projects.
+  // TODO: The remove command should also remove all child workspaces and projects. (Will need to reconsider this)
   // For now the command will just remove the profile only.
   /**
    * Remove a specific profile
@@ -109,7 +109,6 @@ class ProfileManager {
         return { success: false, message: 'Profile name cannot be empty' };
       }
 
-      let activeProfileChanged = false;
       let activeProfile = null;
       const cleanedName = cleanName(profileName);
       const config = await loadConfig();
@@ -117,31 +116,15 @@ class ProfileManager {
       if (!config.profiles.find(profile => profile.name === cleanedName)) {
         return { success: false, message: `Profile "${cleanedName}" does not exist` };
       } else {
-        const profiles = config.profiles;
-        const index = profiles.findIndex(profiles => profiles.name === cleanedName);
-
-        if (index !== -1) {
-          config.profiles.splice(index, 1);
-        }
-
-        if (config.activeProfile === cleanedName) {
-          if (config.profiles.length > 0) {
-            config.activeProfile = config.profiles[0].name;
-            activeProfileChanged = true;
-            activeProfile = config.activeProfile;
-          } else {
-            config.activeProfile = null;
-            activeProfileChanged = true;
-          }
-        }
-
+        const activeProfileChanged = config.activeProfile === cleanedName;
+        config.removeProfile(cleanedName);
         await saveConfig(config);
 
-        return { 
-          success: true, 
+        return {
+          success: true,
           removedProfile: cleanedName,
-          activeProfileChanged: activeProfileChanged, 
-          activeProfile: activeProfile 
+          activeProfileChanged: activeProfileChanged,
+          activeProfile: config.activeProfile
         };
       }
     } catch (error) {
