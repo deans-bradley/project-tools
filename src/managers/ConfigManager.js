@@ -32,7 +32,7 @@ class ConfigManager {
 
   /**
    * Load configuration from file
-   * @returns {Object} Configuration object
+   * @returns {Config} Configuration object
    */
   async loadConfig() {
     try {
@@ -45,7 +45,7 @@ class ConfigManager {
 
   /**
    * Save configuration to file
-   * @param {Object} config - Configuration object to save
+   * @param {Config} config - Configuration object to save
    */
   async saveConfig(config) {
     try {
