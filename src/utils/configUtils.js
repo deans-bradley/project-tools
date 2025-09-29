@@ -2,6 +2,7 @@ import fs from 'fs-extra';
 import path from 'path';
 import os from 'os';
 import { createFolder } from './pathUtils.js';
+import { ConfigError } from '../models/errors/ConfigError.js';
 
 // Configuration file path - shared across the application
 export const CONFIG_PATH = path.join(os.homedir(), '.projecttools', 'config.json');
@@ -10,31 +11,6 @@ const BACKUP_PATH = CONFIG_PATH + '.backup';
 // Configuration cache
 let configCache = null;
 let cacheTimestamp = null;
-
-// Configuration validation schema
-const CONFIG_SCHEMA = {
-  appVersion: 'string',
-  settings: {
-    defaultProjectsPath: 'string',
-    firstTimeSetup: 'boolean'
-  },
-  activeProfile: ['string', 'null'],
-  profiles: 'array',
-  workspaces: 'array',
-  projects: 'array'
-};
-
-/**
- * Custom error class for configuration operations
- */
-class ConfigError extends Error {
-  constructor(message, code, originalError = null) {
-    super(message);
-    this.name = 'ConfigError';
-    this.code = code;
-    this.originalError = originalError;
-  }
-}
 
 /**
  * Validate configuration structure against schema
@@ -281,5 +257,3 @@ export function clearCache() {
   configCache = null;
   cacheTimestamp = null;
 }
-
-export { ConfigError };
