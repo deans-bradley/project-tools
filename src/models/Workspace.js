@@ -15,14 +15,6 @@ class Workspace extends Base {
   }
 
   /**
-   * Generate a unique ID for the workspace
-   * @returns {string} Generated ID
-   */
-  generateId() {
-    return generateId('ws');
-  }
-
-  /**
    * Update the modified date timestamp
    */
   touch() {

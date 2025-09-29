@@ -17,14 +17,6 @@ class Project extends Base {
   }
 
   /**
-   * Generate a unique ID for the project
-   * @returns {string} Generated ID
-   */
-  generateId() {
-    return generateId('proj');
-  }
-
-  /**
    * Update the modified date timestamp
    */
   touch() {

@@ -14,14 +14,6 @@ class Profile extends Base {
   }
 
   /**
-   * Generate a unique ID for the project
-   * @returns {string} Generated ID
-   */
-  generateId() {
-    return generateId('prof');
-  }
-
-  /**
    * Update the modified date timestamp
    */
   touch() {
