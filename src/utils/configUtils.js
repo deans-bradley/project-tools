@@ -198,10 +198,8 @@ export async function initConfig() {
     await fs.ensureDir(path.dirname(CONFIG_PATH));
     
     if (!await fs.pathExists(CONFIG_PATH)) {
-      // Validate default configuration before saving
       validateConfig(DEFAULT_CONFIG);
       
-      // Create default projects directory
       try {
         await createFolder(DEFAULT_CONFIG.settings.defaultProjectsPath);
       } catch (folderError) {
@@ -257,7 +255,6 @@ export async function restoreFromBackup() {
       return false;
     }
     
-    // Validate backup before restoring
     const backupConfig = await fs.readJSON(BACKUP_PATH);
     validateConfig(backupConfig);
     
