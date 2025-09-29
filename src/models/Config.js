@@ -50,9 +50,13 @@ class Config extends Base {
     const index = this.profiles.findIndex(p => p.name === profileName);
     if (index !== -1) {
       this.profiles.splice(index, 1);
-      // Clear active profile if it was the one removed
+      // Update active profile if it was the one removed
       if (this.activeProfile === profileName) {
-        this.activeProfile = null;
+        if (this.profiles.length > 0) {
+          this.activeProfile = this.profiles[0].name;
+        } else {
+          this.activeProfile = null;
+        }
       }
       this.touch();
       return true;
