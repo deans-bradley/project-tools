@@ -1,4 +1,8 @@
 import { Base } from "./Base.js";
+import { Profile } from "./Profile.js";
+import { Project } from "./Project.js";
+import { Settings } from "./Settings.js";
+import { Workspace } from "./Workspace.js";
 
 /**
  * Config class for app configuration
@@ -9,11 +13,9 @@ class Config extends Base {
     const now = new Date().toISOString();
     super(data.createdDate || now, data.modifiedDate || now);
     
-    this.appVersion = data.appVersion || "1.0.0";
-    this.settings = {
-      defaultProjectsPath: data.settings?.defaultProjectsPath || "C:\\Users\\BradleyDeans\\Dev",
-      firstTimeSetup: data.settings?.firstTimeSetup ?? true
-    };
+    this.appVersion = data.appVersion || "0.1.1";
+    this.firstTimeSetup = data.firstTimeSetup ?? true
+    this.settings = data.Settings || {};
     this.activeProfile = data.activeProfile || null;
     this.profiles = Array.isArray(data.profiles) ? [...data.profiles] : [];
     this.workspaces = Array.isArray(data.workspaces) ? [...data.workspaces] : [];
@@ -29,7 +31,7 @@ class Config extends Base {
 
   /**
    * Add a profile to the configuration
-   * @param {Object} profile - Profile object to add
+   * @param {Profile} profile - Profile object to add
    */
   addProfile(profile) {
     if (!profile || typeof profile !== 'object') {
@@ -72,7 +74,7 @@ class Config extends Base {
 
   /**
    * Get the active profile object
-   * @returns {Object|null} Active profile or null if none set
+   * @returns {Profile|null} Active profile or null if none set
    */
   getActiveProfile() {
     if (!this.activeProfile) return null;
@@ -81,7 +83,7 @@ class Config extends Base {
 
   /**
    * Add a workspace to the configuration
-   * @param {Object} workspace - Workspace object to add
+   * @param {Workspace} workspace - Workspace object to add
    */
   addWorkspace(workspace) {
     if (!workspace || typeof workspace !== 'object') {
@@ -93,7 +95,7 @@ class Config extends Base {
 
   /**
    * Add a project to the configuration
-   * @param {Object} project - Project object to add
+   * @param {Project} project - Project object to add
    */
   addProject(project) {
     if (!project || typeof project !== 'object') {
@@ -105,7 +107,7 @@ class Config extends Base {
 
   /**
    * Update settings
-   * @param {Object} newSettings - Settings to update
+   * @param {Settings} newSettings - Settings to update
    */
   updateSettings(newSettings) {
     this.settings = { ...this.settings, ...newSettings };

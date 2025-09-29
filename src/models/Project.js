@@ -1,4 +1,5 @@
 import { Base } from "./Base.js";
+import { generateId } from "../utils/commonUtils.js";
 
 /**
  * Project class for development projects
@@ -10,20 +11,9 @@ class Project extends Base {
     
     this.id = data.id || this.generateId();
     this.name = data.name || "";
-    this.description = data.description || "";
     this.path = data.path || "";
-    this.type = data.type || "general"; // e.g., "nodejs", "python", "react", "general"
-    this.status = data.status || "active"; // e.g., "active", "archived", "paused"
+    this.tags = data.tags || [];
     this.workspaceId = data.workspaceId || null;
-    this.tags = Array.isArray(data.tags) ? [...data.tags] : [];
-    this.metadata = {
-      gitRemote: data.metadata?.gitRemote || null,
-      packageManager: data.metadata?.packageManager || null, // npm, yarn, pnpm, etc.
-      framework: data.metadata?.framework || null,
-      language: data.metadata?.language || null,
-      lastAccessed: data.metadata?.lastAccessed || null,
-      ...data.metadata
-    };
   }
 
   /**
@@ -31,7 +21,7 @@ class Project extends Base {
    * @returns {string} Generated ID
    */
   generateId() {
-    return `proj_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return generateId('proj');
   }
 
   /**
@@ -70,51 +60,6 @@ class Project extends Base {
   }
 
   /**
-   * Set the project status
-   * @param {string} status - New status ("active", "archived", "paused")
-   */
-  setStatus(status) {
-    const validStatuses = ["active", "archived", "paused"];
-    if (!validStatuses.includes(status)) {
-      throw new Error(`Status must be one of: ${validStatuses.join(', ')}`);
-    }
-    this.status = status;
-    this.touch();
-  }
-
-  /**
-   * Archive the project
-   */
-  archive() {
-    this.setStatus("archived");
-  }
-
-  /**
-   * Activate the project
-   */
-  activate() {
-    this.setStatus("active");
-    this.metadata.lastAccessed = new Date().toISOString();
-    this.touch();
-  }
-
-  /**
-   * Pause the project
-   */
-  pause() {
-    this.setStatus("paused");
-  }
-
-  /**
-   * Update project metadata
-   * @param {Object} newMetadata - Metadata to update
-   */
-  updateMetadata(newMetadata) {
-    this.metadata = { ...this.metadata, ...newMetadata };
-    this.touch();
-  }
-
-  /**
    * Check if the project path exists
    * @returns {boolean} True if path exists
    */
@@ -125,30 +70,6 @@ class Project extends Base {
     } catch (error) {
       return false;
     }
-  }
-
-  /**
-   * Check if this is an active project
-   * @returns {boolean} True if project is active
-   */
-  isActive() {
-    return this.status === "active";
-  }
-
-  /**
-   * Check if this is an archived project
-   * @returns {boolean} True if project is archived
-   */
-  isArchived() {
-    return this.status === "archived";
-  }
-
-  /**
-   * Check if this is a paused project
-   * @returns {boolean} True if project is paused
-   */
-  isPaused() {
-    return this.status === "paused";
   }
 
   /**
@@ -164,21 +85,8 @@ class Project extends Base {
       throw new Error('Project name must be a non-empty string');
     }
 
-    if (typeof this.description !== 'string') {
-      throw new Error('Project description must be a string');
-    }
-
     if (!this.path || typeof this.path !== 'string') {
       throw new Error('Project path must be a non-empty string');
-    }
-
-    if (!this.type || typeof this.type !== 'string') {
-      throw new Error('Project type must be a non-empty string');
-    }
-
-    const validStatuses = ["active", "archived", "paused"];
-    if (!validStatuses.includes(this.status)) {
-      throw new Error(`Project status must be one of: ${validStatuses.join(', ')}`);
     }
 
     if (this.workspaceId !== null && typeof this.workspaceId !== 'string') {
@@ -187,10 +95,6 @@ class Project extends Base {
 
     if (!Array.isArray(this.tags)) {
       throw new Error('Project tags must be an array');
-    }
-
-    if (!this.metadata || typeof this.metadata !== 'object') {
-      throw new Error('Project metadata must be an object');
     }
 
     return true;
@@ -204,13 +108,9 @@ class Project extends Base {
     return {
       id: this.id,
       name: this.name,
-      description: this.description,
       path: this.path,
-      type: this.type,
-      status: this.status,
       workspaceId: this.workspaceId,
       tags: [...this.tags],
-      metadata: { ...this.metadata },
       modifiedDate: this.modifiedDate,
       createdDate: this.createdDate
     };
