@@ -22,7 +22,7 @@ export function setupWorkspaceCommands(program, workspaceManager) {
           console.log(chalk.red(result.message));
         }
       } catch (error) {
-        console.error(chalk.red('Error creating workspace:'), error.message);
+        console.error(chalk.red(error.message));
       }
     });
 
@@ -44,7 +44,7 @@ export function setupWorkspaceCommands(program, workspaceManager) {
           console.log('');
         }
       } catch (error) {
-        console.error(chalk.red('Error listing workspaces:'), error.message);
+        console.error(chalk.red(error.message));
       }
     });
 
@@ -60,7 +60,7 @@ export function setupWorkspaceCommands(program, workspaceManager) {
           console.log(chalk.red(result.message));
         }
       } catch (error) {
-        console.error(chalk.red('Error deleting workspace:'), error.message);
+        console.error(chalk.red(error.message));
       }
     });
 }

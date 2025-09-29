@@ -25,7 +25,7 @@ export function setupProfileCommands(program, profileManager) {
           console.log(chalk.red(result.message));
         }
       } catch (error) {
-        console.error(chalk.red('Error creating profile:'), error.message);
+        console.error(chalk.red(error.message));
       }
     });
 
@@ -46,7 +46,7 @@ export function setupProfileCommands(program, profileManager) {
           console.log('');
         }
       } catch (error) {
-        console.error(chalk.red('Error listing profiles:'), error.message);
+        console.error(chalk.red(error.message));
       }
     });
 
@@ -63,7 +63,7 @@ export function setupProfileCommands(program, profileManager) {
           console.log(chalk.red(result.message));
         }
       } catch (error) {
-        console.error(chalk.red('Error switching profile:'), error.message);
+        console.error(chalk.red(error.message));
       }
     });
 
@@ -84,7 +84,7 @@ export function setupProfileCommands(program, profileManager) {
           console.log(chalk.red(result.message));
         }
       } catch (error) {
-        console.error(chalk.red('Error removing profile:'), error.message);
+        console.error(chalk.red(error.message));
       }
     });
 }

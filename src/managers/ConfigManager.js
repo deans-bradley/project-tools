@@ -17,7 +17,7 @@ class ConfigManager {
    */
   async init() {
     try {
-      const wasCreated = initConfig();
+      const wasCreated = await initConfig();
       
       if (wasCreated) {
         console.log(chalk.yellow('First time setup...'));
@@ -34,16 +34,26 @@ class ConfigManager {
    * Load configuration from file
    * @returns {Object} Configuration object
    */
-  loadConfig() {
-    return loadConfig();
+  async loadConfig() {
+    try {
+      return await loadConfig();
+    }
+    catch (error) {
+      throw error;
+    }
   }
 
   /**
    * Save configuration to file
    * @param {Object} config - Configuration object to save
    */
-  saveConfig(config) {
-    return saveConfig(config);
+  async saveConfig(config) {
+    try {
+      return await saveConfig(config);
+    }
+    catch (error) {
+      throw error;
+    }
   }
 
   /**
@@ -53,7 +63,7 @@ class ConfigManager {
    */
   async getSetting(key) {
     try {
-      const config = loadConfig();
+      const config = await loadConfig();
       return config.settings?.[key];
     } catch (error) {
       throw error;
@@ -68,7 +78,7 @@ class ConfigManager {
    */
   async setSetting(key, value) {
     try {
-      const config = loadConfig();
+      const config = await loadConfig();
       
       // Ensure settings object exists
       if (!config.settings) {
@@ -76,7 +86,7 @@ class ConfigManager {
       }
       
       config.settings[key] = value;
-      const success = saveConfig(config);
+      await saveConfig(config);
       
       return { success };
     } catch (error) {
@@ -89,8 +99,13 @@ class ConfigManager {
    * @returns {string} Default projects path
    */
   async getDefaultProjectsPath() {
-    const defaultPath = await this.getSetting('defaultProjectsPath');
-    return defaultPath || path.join(os.homedir(), 'Dev');
+    try {
+      const defaultPath = await this.getSetting('defaultProjectsPath');
+      return defaultPath || path.join(os.homedir(), 'Dev');
+    }
+    catch (error) {
+      throw error;
+    }
   }
 
   /**
@@ -108,7 +123,7 @@ class ConfigManager {
       // Ensure the directory exists
       await fs.ensureDir(resolvedPath);
 
-      const result = this.setSetting('defaultProjectsPath', resolvedPath);
+      const result = await this.setSetting('defaultProjectsPath', resolvedPath);
       return result;
     } catch (error) {
       throw error;
@@ -120,7 +135,12 @@ class ConfigManager {
    * @returns {string} Path to configuration file
    */
   getConfigPath() {
-    return getConfigPath();
+    try {
+      return getConfigPath();
+    }
+    catch (error) {
+      throw error;
+    }
   }
 }
 

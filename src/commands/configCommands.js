@@ -26,7 +26,7 @@ export function setupConfigCommands(program, configManager) {
         console.log(`Config file: ${chalk.gray(configManager.getConfigPath())}`);
         console.log('');
       } catch (error) {
-        console.error(chalk.red('Error showing configuration:'), error.message);
+        console.error(chalk.red(error.message));
       }
     });
 
@@ -49,7 +49,7 @@ export function setupConfigCommands(program, configManager) {
           console.log(chalk.gray('Available keys: default-path'));
         }
       } catch (error) {
-        console.error(chalk.red('Error setting configuration:'), error.message);
+        console.error(chalk.red(error.message));
       }
     });
 }
