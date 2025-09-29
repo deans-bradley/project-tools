@@ -1,4 +1,5 @@
 import { Base } from "./Base.js";
+import { ConfigError } from "./errors/ConfigError.js";
 import { Profile } from "./Profile.js";
 import { Project } from "./Project.js";
 import { Settings } from "./Settings.js";
@@ -14,8 +15,8 @@ class Config extends Base {
     super(data.createdDate || now, data.modifiedDate || now);
     
     this.appVersion = data.appVersion || "0.1.1";
-    this.firstTimeSetup = data.firstTimeSetup ?? true
-    this.settings = data.Settings || {};
+    this.firstTimeSetup = data.firstTimeSetup ?? true;
+    this.settings = new Settings(data.settings || {});
     this.activeProfile = data.activeProfile || null;
     this.profiles = Array.isArray(data.profiles) ? [...data.profiles] : [];
     this.workspaces = Array.isArray(data.workspaces) ? [...data.workspaces] : [];
@@ -110,7 +111,9 @@ class Config extends Base {
    * @param {Settings} newSettings - Settings to update
    */
   updateSettings(newSettings) {
-    this.settings = { ...this.settings, ...newSettings };
+    // Update the existing Settings instance
+    Object.assign(this.settings, newSettings);
+    this.settings.touch();
     this.touch();
   }
 
@@ -118,48 +121,49 @@ class Config extends Base {
    * Mark first time setup as complete
    */
   completeFirstTimeSetup() {
-    this.settings.firstTimeSetup = false;
+    this.firstTimeSetup = false;
     this.touch();
   }
 
   /**
    * Validate the configuration object
-   * @throws {Error} When configuration is invalid
+   * @throws {ConfigError} When configuration is invalid
    */
   validate() {
     if (!this.appVersion || typeof this.appVersion !== 'string') {
-      throw new Error('appVersion must be a non-empty string');
+      throw new ConfigError('appVersion must be a non-empty string', 'INVALID_TYPE');
+    }
+
+    if (typeof this.firstTimeSetup !== 'boolean') {
+      throw new ConfigError('firstTimeSetup must be a boolean', 'INVALID_TYPE');
     }
 
     if (!this.settings || typeof this.settings !== 'object') {
-      throw new Error('settings must be an object');
+      throw new ConfigError('settings must be an object', 'INVALID_TYPE');
     }
 
-    if (!this.settings.defaultProjectsPath || typeof this.settings.defaultProjectsPath !== 'string') {
-      throw new Error('settings.defaultProjectsPath must be a non-empty string');
-    }
-
-    if (typeof this.settings.firstTimeSetup !== 'boolean') {
-      throw new Error('settings.firstTimeSetup must be a boolean');
+    // Validate the Settings instance
+    try {
+      this.settings.validate();
+    } catch (error) {
+      throw new ConfigError(`Invalid settings: ${error.message}`, 'INVALID_SETTINGS');
     }
 
     if (this.activeProfile !== null && typeof this.activeProfile !== 'string') {
-      throw new Error('activeProfile must be a string or null');
+      throw new ConfigError('activeProfile must be a string or null', 'INVALID_TYPE');
     }
 
     if (!Array.isArray(this.profiles)) {
-      throw new Error('profiles must be an array');
+      throw new ConfigError('profiles must be an array', 'INVALID_TYPE');
     }
 
     if (!Array.isArray(this.workspaces)) {
-      throw new Error('workspaces must be an array');
+      throw new ConfigError('workspaces must be an array', 'INVALID_TYPE');
     }
 
     if (!Array.isArray(this.projects)) {
-      throw new Error('projects must be an array');
+      throw new ConfigError('projects must be an array', 'INVALID_TYPE');
     }
-
-    return true;
   }
 
   /**
@@ -169,11 +173,12 @@ class Config extends Base {
   toJSON() {
     return {
       appVersion: this.appVersion,
-      settings: { ...this.settings },
+      firstTimeSetup: this.firstTimeSetup,
+      settings: this.settings.toJSON ? this.settings.toJSON() : this.settings,
       activeProfile: this.activeProfile,
-      profiles: [...this.profiles],
-      workspaces: [...this.workspaces],
-      projects: [...this.projects],
+      profiles: this.profiles.map(p => p.toJSON ? p.toJSON() : p),
+      workspaces: this.workspaces.map(w => w.toJSON ? w.toJSON() : w),
+      projects: this.projects.map(p => p.toJSON ? p.toJSON() : p),
       modifiedDate: this.modifiedDate,
       createdDate: this.createdDate
     };

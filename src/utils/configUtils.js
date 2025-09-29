@@ -2,7 +2,7 @@ import fs from 'fs-extra';
 import path from 'path';
 import os from 'os';
 import { createFolder } from './pathUtils.js';
-import { ConfigError } from '../models/errors/ConfigError.js';
+import { Config, Settings, ConfigError } from '../models/index.js';
 
 // Configuration file path - shared across the application
 export const CONFIG_PATH = path.join(os.homedir(), '.projecttools', 'config.json');
@@ -12,73 +12,23 @@ const BACKUP_PATH = CONFIG_PATH + '.backup';
 let configCache = null;
 let cacheTimestamp = null;
 
-/**
- * Validate configuration structure against schema
- * @param {Object} config - Configuration object to validate
- * @throws {ConfigError} When configuration is invalid
- */
-function validateConfig(config) {
-  if (!config || typeof config !== 'object') {
-    throw new ConfigError('Configuration must be an object', 'INVALID_TYPE');
-  }
-
-  const requiredProps = ['appVersion', 'settings', 'profiles', 'workspaces', 'projects'];
-  for (const prop of requiredProps) {
-    if (!(prop in config)) {
-      throw new ConfigError(`Missing required property: ${prop}`, 'MISSING_PROPERTY');
-    }
-  }
-
-  if (typeof config.appVersion !== 'string') {
-    throw new ConfigError('appVersion must be a string', 'INVALID_TYPE');
-  }
-  
-  if (!config.settings || typeof config.settings !== 'object') {
-    throw new ConfigError('settings must be an object', 'INVALID_TYPE');
-  }
-  
-  if (typeof config.settings.defaultProjectsPath !== 'string') {
-    throw new ConfigError('settings.defaultProjectsPath must be a string', 'INVALID_TYPE');
-  }
-  
-  if (typeof config.settings.firstTimeSetup !== 'boolean') {
-    throw new ConfigError('settings.firstTimeSetup must be a boolean', 'INVALID_TYPE');
-  }
-  
-  if (config.activeProfile !== null && typeof config.activeProfile !== 'string') {
-    throw new ConfigError('activeProfile must be a string or null', 'INVALID_TYPE');
-  }
-  
-  if (!Array.isArray(config.profiles)) {
-    throw new ConfigError('profiles must be an array', 'INVALID_TYPE');
-  }
-  
-  if (!Array.isArray(config.workspaces)) {
-    throw new ConfigError('workspaces must be an array', 'INVALID_TYPE');
-  }
-  
-  if (!Array.isArray(config.projects)) {
-    throw new ConfigError('projects must be an array', 'INVALID_TYPE');
-  }
-}
-
 // Default configuration
-export const DEFAULT_CONFIG = {
+export const DEFAULT_CONFIG = new Config({
   appVersion: '0.1.1',
-  settings: {
-    defaultProjectsPath: path.join(os.homedir(), 'Dev'),
-    firstTimeSetup: false
-  },
+  firstTimeSetup: false,
+  settings: new Settings({
+    defaultProjectsPath: path.join(os.homedir(), 'Dev')
+  }),
   activeProfile: null,
   profiles: [],
   workspaces: [],
   projects: []
-};
+});
 
 /**
  * Load configuration from file with caching and validation
  * @param {boolean} forceReload - Force reload from disk, bypassing cache
- * @returns {Promise<Object>} Configuration object
+ * @returns {Promise<Config>} Configuration object
  * @throws {ConfigError} When configuration is invalid or cannot be loaded
  */
 export async function loadConfig(forceReload = false) {
@@ -89,8 +39,8 @@ export async function loadConfig(forceReload = false) {
       return configCache;
     }
 
-    const config = await fs.readJSON(CONFIG_PATH);
-    validateConfig(config);
+    const configData = await fs.readJSON(CONFIG_PATH);
+    const config = Config.fromJSON(configData);
     
     configCache = config;
     cacheTimestamp = stats.mtime;
@@ -101,7 +51,7 @@ export async function loadConfig(forceReload = false) {
       throw error;
     }
     if (error.code === 'ENOENT') {
-      throw new ConfigError('Configuration file not found. Run initialization first.', 'CONFIG_NOT_FOUND');
+      throw new ConfigError('Configuration file not found.', 'CONFIG_NOT_FOUND');
     }
     if (error.code === 'EACCES') {
       throw new ConfigError('Permission denied accessing configuration file', 'PERMISSION_DENIED', error);
@@ -109,37 +59,35 @@ export async function loadConfig(forceReload = false) {
     if (error.name === 'SyntaxError') {
       throw new ConfigError('Configuration file contains invalid JSON', 'INVALID_JSON', error);
     }
+
     throw new ConfigError(`Failed to load configuration: ${error.message}`, 'LOAD_ERROR', error);
   }
 }
 
 /**
- * Save configuration to file with validation, backup, and atomic writes
- * @param {Object} config - Configuration object to save
+ * Save configuration to file with backup and atomic writes
+ * @param {Config} config - Configuration object to save
  * @throws {ConfigError} When configuration cannot be saved
  */
 export async function saveConfig(config) {
-  if (!config || typeof config !== 'object') {
-    throw new ConfigError('Invalid configuration object', 'INVALID_CONFIG');
+  if (!(config instanceof Config)) {
+    throw new ConfigError('Invalid configuration object: must be an instance of Config', 'INVALID_CONFIG');
   }
 
   try {
-    validateConfig(config);
-    
     await fs.ensureDir(path.dirname(CONFIG_PATH));
-    
-    // Create backup if config exists
+
     if (await fs.pathExists(CONFIG_PATH)) {
       try {
         await fs.copy(CONFIG_PATH, BACKUP_PATH);
-      } catch (backupError) {
-        console.warn('Failed to create backup:', backupError.message);
+      } catch (error) {
+        console.warn('Failed to create backup: ', error.message);
       }
     }
     
     const tempPath = CONFIG_PATH + '.tmp';
-    await fs.writeJSON(tempPath, config, { spaces: 2, mode: 0o600 });
-    await fs.move(tempPath, CONFIG_PATH);
+    await fs.writeJSON(tempPath, config.toJSON(), { spaces: 2, mode: 0o600 });
+    await fs.move(tempPath, CONFIG_PATH, { overwrite: true });
     await fs.chmod(CONFIG_PATH, 0o600);
     
     // Update cache
@@ -167,15 +115,11 @@ export async function saveConfig(config) {
  */
 export async function initConfig() {
   try {
-    await fs.ensureDir(path.dirname(CONFIG_PATH));
-    
     if (!await fs.pathExists(CONFIG_PATH)) {
-      validateConfig(DEFAULT_CONFIG);
-      
       try {
         await createFolder(DEFAULT_CONFIG.settings.defaultProjectsPath);
-      } catch (folderError) {
-        console.warn(`Warning: Could not create default projects directory: ${folderError.message}`);
+      } catch (error) {
+        console.warn(`Could not create default projects directory: ${error.message}`);
       }
       
       await saveConfig(DEFAULT_CONFIG);
@@ -184,8 +128,8 @@ export async function initConfig() {
     
     try {
       await loadConfig(true);
-    } catch (validationError) {
-      throw new ConfigError(`Existing configuration is invalid: ${validationError.message}`, 'INVALID_EXISTING_CONFIG', validationError);
+    } catch (error) {
+      throw new ConfigError(`Existing configuration is invalid: ${error.message}`, 'INVALID_EXISTING_CONFIG', error);
     }
     
     return false;
