@@ -23,7 +23,7 @@ class WorkspaceManager {
         console.log(chalk.yellow(`Workspace name cleaned: "${workspaceName}" → "${cleanedName}"`));
       }
 
-      const config = loadConfig();
+      const config = await loadConfig();
       const existingWorkspace = config.workspaces.find(p => p.name === cleanedName);
 
       if (existingWorkspace) {
@@ -38,14 +38,14 @@ class WorkspaceManager {
       };
 
       config.workspaces.push(newWorkspace);
-      saveConfig(config);
+      await saveConfig(config);
 
       return { 
         success: true,
         workspaceName: cleanedName 
       };
     } catch (error) {
-      return { success: false, message: error.message };
+      throw error;
     }
   }
 
@@ -56,7 +56,7 @@ class WorkspaceManager {
    */
   async listWorkspaces(showAll) {
     try {
-      const config = loadConfig();
+      const config = await loadConfig();
 
       if (showAll) {
         return {
@@ -70,8 +70,7 @@ class WorkspaceManager {
         message: `\nAvailable workspaces in ${config.activeProfile} profile:`
       };
     } catch (error) {
-      console.error(chalk.red('Error loading workspaces:'), error.message);
-      return [];
+      throw error;
     }
   }
 
@@ -89,7 +88,7 @@ class WorkspaceManager {
       }
 
       const cleanedName = cleanName(workspaceName);
-      const config = loadConfig();
+      const config = await loadConfig();
 
       if (!config.workspaces.find(workspace => workspace.name === cleanedName)) {
         return { success: false, message: `Workspace "${cleanedName}" does not exist` };
@@ -100,7 +99,8 @@ class WorkspaceManager {
         if (index !== -1) {
           config.workspaces.splice(index, 1);
         }
-        saveConfig(config);
+
+        await saveConfig(config);
 
         return {
           success: true,
@@ -108,7 +108,7 @@ class WorkspaceManager {
         };
       }
     } catch (error) {
-      return { success: false, message: error.message };
+      throw error;
     }
   }
 }

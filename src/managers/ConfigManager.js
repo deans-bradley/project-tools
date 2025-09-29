@@ -26,8 +26,7 @@ class ConfigManager {
         console.log(chalk.gray('   You can change this later with: pt config set default-path <path>'));
       }
     } catch (error) {
-      console.error(chalk.red('Error initializing ProjectTools:'), error.message);
-      process.exit(1);
+      throw error;
     }
   }
 
@@ -57,8 +56,7 @@ class ConfigManager {
       const config = loadConfig();
       return config.settings?.[key];
     } catch (error) {
-      console.error(chalk.red('Error getting setting:'), error.message);
-      return null;
+      throw error;
     }
   }
 
@@ -82,7 +80,7 @@ class ConfigManager {
       
       return { success };
     } catch (error) {
-      return { success: false, message: error.message };
+      throw error;
     }
   }
 
@@ -113,7 +111,7 @@ class ConfigManager {
       const result = this.setSetting('defaultProjectsPath', resolvedPath);
       return result;
     } catch (error) {
-      return { success: false, message: error.message };
+      throw error;
     }
   }
 

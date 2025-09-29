@@ -23,7 +23,7 @@ class ProfileManager {
         console.log(chalk.yellow(`Profile name cleaned: "${profileName}" → "${cleanedName}"`));
       }
 
-      const config = loadConfig();
+      const config = await loadConfig();
       const existingProfile = config.profiles.find(p => p.name === cleanedName);
 
       if (existingProfile) {
@@ -43,11 +43,11 @@ class ProfileManager {
         config.activeProfile = cleanedName;
       }
 
-      saveConfig(config);
+      await saveConfig(config);
 
       return { success: true, isFirstProfile };
     } catch (error) {
-      return { success: false, message: error.message };
+      throw error;
     }
   }
 
@@ -57,15 +57,14 @@ class ProfileManager {
    */
   async listProfiles() {
     try {
-      const config = loadConfig();
+      const config = await loadConfig();
       
       return config.profiles.map(profile => ({
         ...profile,
         active: profile.name === config.activeProfile
       }));
     } catch (error) {
-      console.error(chalk.red('Error loading profiles:'), error.message);
-      return [];
+      throw error;
     }
   }
 
@@ -81,7 +80,7 @@ class ProfileManager {
       }
 
       const cleanedName = cleanName(profileName);
-      const config = loadConfig();
+      const config = await loadConfig();
 
       if (config.activeProfile === cleanedName) {
         return { success: false, message: `Already on profile "${cleanedName}"` };
@@ -89,11 +88,11 @@ class ProfileManager {
         return { success: false, message: `Profile "${cleanedName}" does not exist` };
       } else {
         config.activeProfile = cleanedName;
-        saveConfig(config);
+        await saveConfig(config);
         return { success: true, profileName: cleanedName };
       }
     } catch (error) {
-      return { success: false, message: error.message };
+      throw error;
     }
   }
 
@@ -113,7 +112,7 @@ class ProfileManager {
       let activeProfileChanged = false;
       let activeProfile = null;
       const cleanedName = cleanName(profileName);
-      const config = loadConfig();
+      const config = await loadConfig();
 
       if (!config.profiles.find(profile => profile.name === cleanedName)) {
         return { success: false, message: `Profile "${cleanedName}" does not exist` };
@@ -136,7 +135,7 @@ class ProfileManager {
           }
         }
 
-        saveConfig(config);
+        await saveConfig(config);
 
         return { 
           success: true, 
@@ -146,7 +145,7 @@ class ProfileManager {
         };
       }
     } catch (error) {
-      return { success: false, message: error.message };
+      throw error;
     }
   }
 }

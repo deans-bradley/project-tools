@@ -1,7 +1,6 @@
 import fs from 'fs-extra';
 import path from 'path';
 import os from 'os';
-import chalk from 'chalk';
 import { createFolder } from './pathUtils.js';
 
 // Configuration file path - shared across the application
@@ -9,7 +8,7 @@ export const CONFIG_PATH = path.join(os.homedir(), '.projecttools', 'config.json
 
 // Default configuration structure
 export const DEFAULT_CONFIG = {
-  appVersion: '1.0.0',
+  appVersion: '0.1.1',
   settings: {
     defaultProjectsPath: path.join(os.homedir(), 'Dev'),
     firstTimeSetup: false
@@ -29,24 +28,20 @@ export async function loadConfig() {
     const config = await fs.readJSON(CONFIG_PATH);
     return config;
   } catch (error) {
-    console.error(chalk.red('Error loading configuration:'), error.message);
-    return DEFAULT_CONFIG;
+    throw error;
   }
 }
 
 /**
  * Save configuration to file
  * @param {Object} config - Configuration object to save
- * @returns {boolean} Success status
  */
 export async function saveConfig(config) {
   try {
     await fs.ensureDir(path.dirname(CONFIG_PATH));
     await fs.writeJSON(CONFIG_PATH, config, { spaces: 2 });
-    return true;
   } catch (error) {
-    console.error(chalk.red('Error saving configuration:'), error.message);
-    return false;
+    throw error;
   }
 }
 
@@ -61,11 +56,8 @@ export async function initConfig() {
     if (!await fs.pathExists(CONFIG_PATH)) {
       await createFolder(DEFAULT_CONFIG.settings.defaultProjectsPath);
       await saveConfig(DEFAULT_CONFIG);
-      return true;
     }
-    return false; 
   } catch (error) {
-    console.error(chalk.red('Error initializing configuration:'), error.message);
     throw error;
   }
 }
