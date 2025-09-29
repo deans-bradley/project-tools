@@ -83,10 +83,6 @@ export const DEFAULT_CONFIG = {
  */
 export async function loadConfig(forceReload = false) {
   try {
-    if (!await fs.pathExists(CONFIG_PATH)) {
-      throw new ConfigError('Configuration file not found. Run initialization first.', 'CONFIG_NOT_FOUND');
-    }
-
     const stats = await fs.stat(CONFIG_PATH);
     
     if (!forceReload && configCache && cacheTimestamp && cacheTimestamp >= stats.mtime) {
