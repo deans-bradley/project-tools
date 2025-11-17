@@ -1,10 +1,10 @@
 // Core models
-export { Base } from './Base.js';
-export { Config } from './Config.js';
-export { Settings } from './Settings.js';
-export { Profile } from './Profile.js';
-export { Workspace } from './Workspace.js';
-export { Project } from './Project.js';
+export { Base } from './core/Base.js';
+export { Config } from './core/Config.js';
+export { Settings } from './core/Settings.js';
+export { Profile } from './core/Profile.js';
+export { Workspace } from './core/Workspace.js';
+export { Project } from './core/Project.js';
 
 // Error models
-export { ConfigError } from './errors/ConfigError.js';
+export { BusinessError } from './errors/BusinessError.js';
