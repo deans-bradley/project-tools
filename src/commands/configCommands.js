@@ -1,4 +1,5 @@
 import chalk from 'chalk';
+import { SETTINGS_KEY } from '../models/constants/index.js';
 
 /**
  * Setup configuration-related CLI commands
@@ -37,16 +38,12 @@ export function setupConfigCommands(program, configManager) {
     .description('Set a configuration value')
     .action(async (key, value) => {
       try {
-        if (key === 'default-path') {
-          const result = await configManager.setDefaultProjectsPath(value);
-          if (result.success) {
-            console.log(chalk.green(`Default projects path set to: ${value}`));
-          } else {
-            console.log(chalk.red(result.message));
-          }
+        if (key.trim() === SETTINGS_KEY.DEFAULT_PATH) {
+          await configManager.setDefaultProjectsPath(value);
+          console.log(chalk.green(`Default projects path set to: ${value}`));
         } else {
           console.log(chalk.red(`Unknown configuration key: ${key}`));
-          console.log(chalk.gray('Available keys: default-path'));
+          console.log(chalk.gray(`Available keys: ${SETTINGS_KEY.DEFAULT_PATH}`));
         }
       } catch (error) {
         console.error(chalk.red(error.message));
