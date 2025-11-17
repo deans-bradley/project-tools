@@ -13,9 +13,11 @@ export function setupWorkspaceCommands(program, workspaceManager) {
   workspaceCommand
     .command('add <workspaceName>')
     .description('Create a new workspace')
-    .action(async (workspaceName) => {
+    .option('-p, --path <path>', 'Set the workspace path')
+    .option('--prof <profile>', 'Profile to add workspace to')
+    .action(async (workspaceName, options) => {
       try {
-        const result = await workspaceManager.addWorkspace(workspaceName);
+        const result = await workspaceManager.addWorkspace(workspaceName, options);
         if (result.success) {
           console.log(chalk.green(`Workspace "${result.workspaceName}" created successfully!`));
         } else {
@@ -29,7 +31,7 @@ export function setupWorkspaceCommands(program, workspaceManager) {
   workspaceCommand
     .command('list')
     .description('List all workspaces')
-    .option('-a, --all', 'list all worpspace')
+    .option('-a, --all', 'List all worpspace')
     .action(async (options) => {
       try {
         const result = await workspaceManager.listWorkspaces(options.all);
