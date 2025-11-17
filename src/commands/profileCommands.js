@@ -1,4 +1,5 @@
 import chalk from 'chalk';
+import { cleanName } from '../utils/commonUtils.js';
 
 /**
  * Setup configuration-related CLI commands
@@ -15,14 +16,11 @@ export function setupProfileCommands(program, profileManager) {
     .description('Create a new profile')
     .action(async (profileName) => {
       try {
-        const result = await profileManager.addProfile(profileName);
-        if (result.success) {
-          console.log(chalk.green(`Profile "${profileName}" created successfully!`));
-          if (result.isFirstProfile) {
-            console.log(chalk.blue(`"${profileName}" is now your active profile`));
-          }
-        } else {
-          console.log(chalk.red(result.message));
+        const isFirstProfile = await profileManager.addProfile(profileName);
+        console.log(chalk.green(`Profile "${cleanName(profileName)}" created successfully!`));
+        
+        if (isFirstProfile) {
+          console.log(chalk.blue(`"${cleanName(profileName)}" is now your active profile`));
         }
       } catch (error) {
         console.error(chalk.red(error.message));
@@ -40,7 +38,7 @@ export function setupProfileCommands(program, profileManager) {
         } else {
           console.log(chalk.cyan('\nAvailable Profiles:'));
           profiles.forEach(profile => {
-            const indicator = profile.active ? chalk.green('● (active)') : chalk.gray('○');
+            const indicator = profile.isActive ? chalk.green('● (active)') : chalk.gray('○');
             console.log(`  ${indicator} ${profile.name}`);
           });
           console.log('');
@@ -55,13 +53,8 @@ export function setupProfileCommands(program, profileManager) {
     .description('Switch profiles')
     .action(async (profileName) => {
       try {
-        const result = await profileManager.switchProfile(profileName);
-
-        if (result.success) {
-          console.log(chalk.green(`Switched to profile "${result.profileName}"`));
-        } else {
-          console.log(chalk.red(result.message));
-        }
+        await profileManager.switchProfile(profileName);
+        console.log(chalk.green(`Switched to profile "${cleanName(profileName)}"`));
       } catch (error) {
         console.error(chalk.red(error.message));
       }
@@ -73,15 +66,12 @@ export function setupProfileCommands(program, profileManager) {
     .action(async (profileName) => {
       try {
         const result = await profileManager.removeProfile(profileName);
-        if (result.success) {
-          console.log(chalk.green(`Profile "${result.removedProfile}" removed`));
-          if (result.activeProfileChanged && result.activeProfile) {
-            console.log(chalk.blue(`"${result.activeProfile}" is now your active profile`));
-          } else if (result.activeProfileChanged && !result.activeProfile) {
-            console.log(chalk.yellow('No profiles found. Create one with: pt profile add <name>'));
-          }
-        } else {
-          console.log(chalk.red(result.message));
+        console.log(chalk.green(`Profile "${result.removedProfile}" removed`));
+
+        if (result.activeProfileChanged && result.activeProfile) {
+          console.log(chalk.blue(`"${result.activeProfile}" is now your active profile`));
+        } else if (result.activeProfileChanged && !result.activeProfile) {
+          console.log(chalk.yellow('No profiles found. Create one with: pt profile add <name>'));
         }
       } catch (error) {
         console.error(chalk.red(error.message));
