@@ -1,6 +1,8 @@
 import chalk from 'chalk';
+import fs from 'fs-extra';
 import { loadConfig, saveConfig } from '../utils/configUtils.js';
-import { generateId, cleanName } from '../utils/commonUtils.js';
+import { cleanName } from '../utils/commonUtils.js';
+import { Workspace } from '../models/index.js';
 
 /**
  * WorkspaceManager - Handles all workspace-related operations
@@ -11,38 +13,58 @@ class WorkspaceManager {
    * @param {string} workspaceName - Name of the workspace to create
    * @returns {Object} Result object with success status and message
    */
-  async addWorkspace(workspaceName) {
-    try {   
-      if (!workspaceName || workspaceName.trim() === '') {
-        return { success: false, message: 'Workspace name cannot be empty' };
-      }
+  async addWorkspace(workspaceName, options) {
+    try {
+      let workspacePath = options.path;
+      let profileName = options.profile;
 
-      const cleanedName = cleanName(workspaceName);
+      if (!workspaceName || workspaceName.trim() === '')
+        return { success: false, message: 'Workspace name cannot be empty' };
+
+      if (workspacePath && workspacePath.trim() === '')
+        return { success: false, message: 'Path cannot be empty' };
+
+      if (profileName && profileName.trim() === '')
+        return { success: false, message: 'Profile cannot be empty' };
+
+      const cleanedWorkspaceName = cleanName(workspaceName);
       
-      if (cleanedName !== workspaceName.trim().toLowerCase()) {
-        console.log(chalk.yellow(`Workspace name cleaned: "${workspaceName}" → "${cleanedName}"`));
-      }
+      if (cleanedWorkspaceName !== workspaceName.trim().toLowerCase())
+        console.log(chalk.yellow(`Workspace name cleaned: "${workspaceName}" → "${cleanedWorkspaceName}"`));
 
       const config = await loadConfig();
-      const existingWorkspace = config.workspaces.find(p => p.name === cleanedName);
 
-      if (existingWorkspace) {
-        return { success: false, message: `Workspace "${cleanedName}" already exists` };
+      if (config.workspaces.find(ws => ws.name === cleanedWorkspaceName))
+        return { success: false, message: `Workspace "${cleanedWorkspaceName}" already exists` };
+
+      let profile;
+
+      if (profileName) {
+        profile = config.profiles.find(p => p.name === cleanName(profileName));
+
+        if (!profile) {
+          return { success: false, message: `Profile "${profileName}" does not exist. Add a new profile with: pt profile add <profile>` };
+        }
       }
 
-      const newWorkspace = {
-        id: generateId('ws'),
-        name: cleanedName,
-        profile: config.activeProfile,
-        created: new Date().toISOString()
-      };
+      if (workspacePath) {
+        await fs.ensureDir(workspacePath);
+      } else {
+        workspacePath = `${config.settings.defaultProjectsPath}/${profile.name}/${cleanedWorkspaceName}`
+        await fs.ensureDir(workspacePath);
+      }
 
-      config.workspaces.push(newWorkspace);
+      const newWorkspace = new Workspace({
+        name: cleanedWorkspaceName,
+        path: workspacePath
+      });
+      
+      config.addWorkspace(newWorkspace, profile);
       await saveConfig(config);
 
       return { 
         success: true,
-        workspaceName: cleanedName 
+        workspaceName: cleanedWorkspaceName
       };
     } catch (error) {
       throw error;
@@ -74,8 +96,6 @@ class WorkspaceManager {
     }
   }
 
-  // TODO: The remove command should also remove all child projects.
-  // For now the command will just remove the workspace only.
   /**
    * Remove a specific workspace
    * @param {string} workspaceName - Name of the workspace to remove
