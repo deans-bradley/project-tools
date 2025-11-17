@@ -1,8 +1,8 @@
 import fs from 'fs-extra';
 import path from 'path';
 import os from 'os';
-import { createFolder } from './pathUtils.js';
-import { Config, Settings, ConfigError } from '../models/index.js';
+import { Config, Settings, BusinessError } from '../models/index.js';
+import { CONFIG_ERROR } from '../models/constants/index.js';
 
 // Configuration file path - shared across the application
 export const CONFIG_PATH = path.join(os.homedir(), '.projecttools', 'config.json');
@@ -19,17 +19,14 @@ export const DEFAULT_CONFIG = new Config({
   settings: new Settings({
     defaultProjectsPath: path.join(os.homedir(), 'Dev')
   }),
-  activeProfile: null,
-  profiles: [],
-  workspaces: [],
-  projects: []
+  profiles: []
 });
 
 /**
  * Load configuration from file with caching and validation
  * @param {boolean} forceReload - Force reload from disk, bypassing cache
  * @returns {Promise<Config>} Configuration object
- * @throws {ConfigError} When configuration is invalid or cannot be loaded
+ * @throws {BusinessError} When configuration is invalid or cannot be loaded
  */
 export async function loadConfig(forceReload = false) {
   try {
@@ -47,31 +44,31 @@ export async function loadConfig(forceReload = false) {
     
     return config;
   } catch (error) {
-    if (error instanceof ConfigError) {
+    if (error instanceof BusinessError) {
       throw error;
     }
     if (error.code === 'ENOENT') {
-      throw new ConfigError('Configuration file not found.', 'CONFIG_NOT_FOUND');
+      throw new BusinessError(CONFIG_ERROR.NOT_FOUND);
     }
     if (error.code === 'EACCES') {
-      throw new ConfigError('Permission denied accessing configuration file', 'PERMISSION_DENIED', error);
+      throw new BusinessError(CONFIG_ERROR.PERMISSION_DENIED, null, error);
     }
     if (error.name === 'SyntaxError') {
-      throw new ConfigError('Configuration file contains invalid JSON', 'INVALID_JSON', error);
+      throw new BusinessError(CONFIG_ERROR.INVALID_JSON, null, error);
     }
 
-    throw new ConfigError(`Failed to load configuration: ${error.message}`, 'LOAD_ERROR', error);
+    throw new BusinessError(CONFIG_ERROR.LOAD_ERROR, null, error);
   }
 }
 
 /**
  * Save configuration to file with backup and atomic writes
  * @param {Config} config - Configuration object to save
- * @throws {ConfigError} When configuration cannot be saved
+ * @throws {BusinessError} When configuration cannot be saved
  */
 export async function saveConfig(config) {
   if (!(config instanceof Config)) {
-    throw new ConfigError('Invalid configuration object: must be an instance of Config', 'INVALID_CONFIG');
+    throw new BusinessError(CONFIG_ERROR.INVALID_CONFIG);
   }
 
   try {
@@ -95,33 +92,27 @@ export async function saveConfig(config) {
     cacheTimestamp = new Date();
     
   } catch (error) {
-    if (error instanceof ConfigError) {
+    if (error instanceof BusinessError) {
       throw error;
     }
     if (error.code === 'EACCES') {
-      throw new ConfigError('Permission denied writing configuration file', 'PERMISSION_DENIED', error);
+      throw new BusinessError(CONFIG_ERROR.PERMISSION_DENIED, null, error);
     }
     if (error.code === 'ENOSPC') {
-      throw new ConfigError('Insufficient disk space to save configuration', 'DISK_FULL', error);
+      throw new BusinessError(CONFIG_ERROR.DISK_FULL, null,  error);
     }
-    throw new ConfigError(`Failed to save configuration: ${error.message}`, 'SAVE_ERROR', error);
+    throw new BusinessError(CONFIG_ERROR.SAVE_ERROR, null, error);
   }
 }
 
 /**
  * Initialize configuration file if it doesn't exist
  * @returns {Promise<boolean>} True if config was created, false if it already existed
- * @throws {ConfigError} When initialization fails
+ * @throws {BusinessError} When initialization fails
  */
 export async function initConfig() {
   try {
     if (!await fs.pathExists(CONFIG_PATH)) {
-      try {
-        await createFolder(DEFAULT_CONFIG.settings.defaultProjectsPath);
-      } catch (error) {
-        console.warn(`Could not create default projects directory: ${error.message}`);
-      }
-      
       await saveConfig(DEFAULT_CONFIG);
       return true;
     }
@@ -129,18 +120,18 @@ export async function initConfig() {
     try {
       await loadConfig(true);
     } catch (error) {
-      throw new ConfigError(`Existing configuration is invalid: ${error.message}`, 'INVALID_EXISTING_CONFIG', error);
+      throw new BusinessError(CONFIG_ERROR.INVALID_EXISTING_CONFIG, null, error);
     }
     
     return false;
   } catch (error) {
-    if (error instanceof ConfigError) {
+    if (error instanceof BusinessError) {
       throw error;
     }
     if (error.code === 'EACCES') {
-      throw new ConfigError('Permission denied during configuration initialization', 'PERMISSION_DENIED', error);
+      throw new BusinessError(CONFIG_ERROR.PERMISSION_DENIED, null, error);
     }
-    throw new ConfigError(`Failed to initialize configuration: ${error.message}`, 'INIT_ERROR', error);
+    throw new BusinessError(CONFIG_ERROR.INIT_ERROR, null, error);
   }
 }
 
@@ -163,7 +154,7 @@ export function getBackupPath() {
 /**
  * Restore configuration from backup
  * @returns {Promise<boolean>} True if backup was restored, false if no backup exists
- * @throws {ConfigError} When restore operation fails
+ * @throws {BusinessError} When restore operation fails
  */
 export async function restoreFromBackup() {
   try {
@@ -182,10 +173,10 @@ export async function restoreFromBackup() {
     
     return true;
   } catch (error) {
-    if (error instanceof ConfigError) {
+    if (error instanceof BusinessError) {
       throw error;
     }
-    throw new ConfigError(`Failed to restore from backup: ${error.message}`, 'RESTORE_ERROR', error);
+    throw new BusinessError(CONFIG_ERROR.RESTORE_ERROR, null, error);
   }
 }
 
