@@ -74,21 +74,18 @@ class ConfigManager {
    * Set a configuration setting
    * @param {string} key - Setting key
    * @param {any} value - Setting value
-   * @returns {Object} Result object with success status
+   * @returns {Promise<void>}
    */
   async setSetting(key, value) {
     try {
       const config = await loadConfig();
       
-      // Ensure settings object exists
       if (!config.settings) {
         config.settings = {};
       }
       
       config.settings[key] = value;
       await saveConfig(config);
-      
-      return { success };
     } catch (error) {
       throw error;
     }
@@ -111,7 +108,7 @@ class ConfigManager {
   /**
    * Set the default projects path
    * @param {string} projectsPath - New default projects path
-   * @returns {Object} Result object with success status
+   * @returns {Promise<void>} Result object with success status
    */
   async setDefaultProjectsPath(projectsPath) {
     try {
@@ -120,11 +117,8 @@ class ConfigManager {
         ? path.join(os.homedir(), projectsPath.slice(1))
         : path.resolve(projectsPath);
 
-      // Ensure the directory exists
       await fs.ensureDir(resolvedPath);
-
-      const result = await this.setSetting('defaultProjectsPath', resolvedPath);
-      return result;
+      await this.setSetting('defaultProjectsPath', resolvedPath);
     } catch (error) {
       throw error;
     }
