@@ -1,7 +1,8 @@
 import chalk from 'chalk';
-import { generateId, cleanName } from '../utils/commonUtils.js';
+import { cleanName } from '../utils/commonUtils.js';
 import { loadConfig, saveConfig } from '../utils/configUtils.js';
-import { Config, Profile } from '../models/index.js';
+import { Profile, BusinessError } from '../models/index.js';
+import { PROFILE_ERROR } from '../models/constants/index.js';
 
 /**
  * ProfileManager - Handles all profile-related operations
@@ -10,42 +11,35 @@ class ProfileManager {
   /**
    * Add a new profile
    * @param {string} profileName - Name of the profile to create
-   * @returns {Object} Result object with success status and message
+   * @returns {boolean} True if is first profile added, otherwise false
+   * @throws {BusinessError}
    */
   async addProfile(profileName) {
     try {
-      if (!profileName || profileName.trim() === '') {
-        return { success: false, message: 'Profile name cannot be empty' };
-      }
+      if (!profileName || profileName.trim() === '')
+        throw new BusinessError(PROFILE_ERROR.PROFILE_EMPTY_NAME);
 
       const cleanedName = cleanName(profileName);
       
-      if (cleanedName !== profileName.trim().toLowerCase()) {
+      if (cleanedName !== profileName.trim().toLowerCase())
         console.log(chalk.yellow(`Profile name cleaned: "${profileName}" → "${cleanedName}"`));
-      }
 
       const config = await loadConfig();
-      const existingProfile = config.profiles.find(p => p.name === cleanedName);
 
-      if (existingProfile) {
-        return { success: false, message: `Profile "${cleanedName}" already exists` };
-      }
+      if (config.profiles.find(p => p.name === cleanedName))
+        throw new BusinessError(PROFILE_ERROR.PROFILE_ALREADY_EXISTS);
 
-      const newProfile = new Profile({
-        id: generateId('prof'),
-        name: cleanedName
-      });
+      const isFirstProfile = config.profiles.length === 0;
 
-      config.addProfile(newProfile);
-      const isFirstProfile = config.profiles.length === 1;
-
-      if (isFirstProfile) {
-        config.setActiveProfile(cleanedName);
-      }
+      config.addProfile(
+        new Profile({
+          name: cleanedName,
+          isActive: isFirstProfile
+        })
+      );
 
       await saveConfig(config);
-
-      return { success: true, isFirstProfile };
+      return isFirstProfile;
     } catch (error) {
       throw error;
     }
@@ -58,11 +52,7 @@ class ProfileManager {
   async listProfiles() {
     try {
       const config = await loadConfig();
-      
-      return config.profiles.map(profile => ({
-        ...profile,
-        active: profile.name === config.activeProfile
-      }));
+      return config.profiles;
     } catch (error) {
       throw error;
     }
@@ -71,57 +61,52 @@ class ProfileManager {
   /**
    * Switch to a different profile
    * @param {string} profileName - Name of the profile to switch
-   * @returns {Object} Result object with success status and message
+   * @throws {BusinessError}
    */
   async switchProfile(profileName) {
     try {
-      if (!profileName || profileName.trim() === '') {
-        return { success: false, message: 'Profile name cannot be empty' };
-      }
+      if (!profileName || profileName.trim() === '')
+        throw new BusinessError(PROFILE_ERROR.PROFILE_EMPTY_NAME);
 
       const cleanedName = cleanName(profileName);
       const config = await loadConfig();
+      const activeProfile = config.getActiveProfile();
 
-      if (config.activeProfile === cleanedName) {
-        return { success: false, message: `Already on profile "${cleanedName}"` };
+      if (activeProfile.name === cleanedName) {
+        throw new BusinessError(PROFILE_ERROR.PROFILE_ALREADY_ACTIVE);
       } else if (!config.profiles.find(profile => profile.name === cleanedName)) {
-        return { success: false, message: `Profile "${cleanedName}" does not exist` };
+        throw new BusinessError(PROFILE_ERROR.PROFILE_NOT_FOUND);
       } else {
         config.setActiveProfile(cleanedName);
         await saveConfig(config);
-        return { success: true, profileName: cleanedName };
       }
     } catch (error) {
       throw error;
     }
   }
 
-  // TODO: The remove command should also remove all child workspaces and projects. (Will need to reconsider this)
-  // For now the command will just remove the profile only.
   /**
    * Remove a specific profile
    * @param {string} profileName - Name of the profile to remove
-   * @returns {Object} Result object with success status and message
+   * @returns {{removeProfile: string, activeProfileChanged: boolean, activeProfile: string}} Result object with success status and message
+   * @throws {BusinessError}
    */
   async removeProfile(profileName) {
     try {
-      if (!profileName || profileName.trim() === '') {
-        return { success: false, message: 'Profile name cannot be empty' };
-      }
+      if (!profileName || profileName.trim() === '')
+        throw new BusinessError(PROFILE_ERROR.PROFILE_EMPTY_NAME);
 
-      let activeProfile = null;
       const cleanedName = cleanName(profileName);
       const config = await loadConfig();
 
       if (!config.profiles.find(profile => profile.name === cleanedName)) {
-        return { success: false, message: `Profile "${cleanedName}" does not exist` };
+        throw new BusinessError(PROFILE_ERROR.PROFILE_NOT_FOUND);
       } else {
         const activeProfileChanged = config.activeProfile === cleanedName;
         config.removeProfile(cleanedName);
         await saveConfig(config);
 
         return {
-          success: true,
           removedProfile: cleanedName,
           activeProfileChanged: activeProfileChanged,
           activeProfile: config.activeProfile
