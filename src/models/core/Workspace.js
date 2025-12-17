@@ -1,5 +1,6 @@
 import { Base, Project } from '../index.js';
 import { generateId } from '../../utils/commonUtils.js';
+import fs from 'fs-extra';
 
 /**
  * @typedef {Object} WorkspaceData
@@ -40,7 +41,6 @@ class Workspace extends Base {
    */
   async exists() {
     try {
-      const fs = await import('fs-extra');
       return await fs.pathExists(this.path);
     } catch (error) {
       return false;
