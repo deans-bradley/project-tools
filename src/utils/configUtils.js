@@ -83,6 +83,8 @@ export async function saveConfig(config) {
     }
     
     const tempPath = CONFIG_PATH + '.tmp';
+    config.touch();
+
     await fs.writeJSON(tempPath, config.toJSON(), { spaces: 2, mode: 0o600 });
     await fs.move(tempPath, CONFIG_PATH, { overwrite: true });
     await fs.chmod(CONFIG_PATH, 0o600);
