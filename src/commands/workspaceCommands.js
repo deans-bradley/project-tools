@@ -14,15 +14,11 @@ export function setupWorkspaceCommands(program, workspaceManager) {
     .command('add <workspaceName>')
     .description('Create a new workspace')
     .option('-p, --path <path>', 'Set the workspace path')
-    .option('--prof <profile>', 'Profile to add workspace to')
+    .option('--profile <profile>', 'Profile to add workspace to')
     .action(async (workspaceName, options) => {
       try {
-        const result = await workspaceManager.addWorkspace(workspaceName, options);
-        if (result.success) {
-          console.log(chalk.green(`Workspace "${result.workspaceName}" created successfully!`));
-        } else {
-          console.log(chalk.red(result.message));
-        }
+        const cleanedWorkspaceName = await workspaceManager.addWorkspace(workspaceName, options);
+        console.log(chalk.green(`Workspace "${cleanedWorkspaceName}" created successfully!`));
       } catch (error) {
         console.error(chalk.red(error.message));
       }
@@ -34,16 +30,23 @@ export function setupWorkspaceCommands(program, workspaceManager) {
     .option('-a, --all', 'List all worpspace')
     .action(async (options) => {
       try {
-        const result = await workspaceManager.listWorkspaces(options.all);
-        const workspaces = result.workspaces;
-        if (workspaces.length === 0) {
+        const result = await workspaceManager.listWorkspaces(options);
+        if (result.length === 0) {
           console.log(chalk.yellow('No workspaces found. Create one with: pt workspace add <name>'));
+        } 
+        
+        if (options.all) {
+          result.forEach(profile => {
+            console.log(chalk.cyan(`${profile.name}:`));
+            profile.workspaces.forEach(workspace => {
+              console.log(`  ○ ${workspace.name}`);
+            });
+          });
         } else {
-          console.log(chalk.cyan(result.message));
-          workspaces.forEach(workspace => {
+          console.log(chalk.cyan('Current Workspaces'));
+          result.forEach(workspace => {
             console.log(`  ○ ${workspace.name}`);
           });
-          console.log('');
         }
       } catch (error) {
         console.error(chalk.red(error.message));
@@ -53,14 +56,11 @@ export function setupWorkspaceCommands(program, workspaceManager) {
   workspaceCommand
     .command('remove <workspaceName>')
     .description('Remove a specific workspace')
-    .action(async (workspaceName) => {
+    .option('--profile <profile>', 'Profile to remove workspace from')
+    .action(async (workspaceName, options) => {
       try {
-        const result = await workspaceManager.removeWorkspace(workspaceName);
-        if (result.success) {
-          console.log(chalk.green(`Workspace "${result.removedWorkspace}" removed`));
-        } else {
-          console.log(chalk.red(result.message));
-        }
+        const cleanedWorkspaceName = await workspaceManager.removeWorkspace(workspaceName, options);
+        console.log(chalk.green(`Workspace "${cleanedWorkspaceName}" removed`));
       } catch (error) {
         console.error(chalk.red(error.message));
       }
