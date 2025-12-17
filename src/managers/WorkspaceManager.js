@@ -2,7 +2,9 @@ import chalk from 'chalk';
 import fs from 'fs-extra';
 import { loadConfig, saveConfig } from '../utils/configUtils.js';
 import { cleanName } from '../utils/commonUtils.js';
-import { Workspace } from '../models/index.js';
+import { Workspace, BusinessError } from '../models/index.js';
+import { WORKSPACE_ERROR } from '../models/constants/errors/workspaceError.js';
+import { PROFILE_ERROR } from '../models/constants/index.js';
 
 /**
  * WorkspaceManager - Handles all workspace-related operations
@@ -11,21 +13,23 @@ class WorkspaceManager {
   /**
    * Add a new workspace
    * @param {string} workspaceName - Name of the workspace to create
-   * @returns {Object} Result object with success status and message
+   * @param {{path: string|undefined, profile: string|undefined}} options - Add workspace options
+   * @returns {string} The cleaned workspace name
    */
   async addWorkspace(workspaceName, options) {
     try {
       let workspacePath = options.path;
-      let profileName = options.profile;
+      const profileName = options.profile;
+      let profile;
 
       if (!workspaceName || workspaceName.trim() === '')
-        return { success: false, message: 'Workspace name cannot be empty' };
+        throw new BusinessError(WORKSPACE_ERROR.EMPTY_NAME);
 
       if (workspacePath && workspacePath.trim() === '')
-        return { success: false, message: 'Path cannot be empty' };
+        throw new BusinessError(WORKSPACE_ERROR.EMPTY_PATH);
 
       if (profileName && profileName.trim() === '')
-        return { success: false, message: 'Profile cannot be empty' };
+        throw new BusinessError(WORKSPACE_ERROR.EMPTY_PROFILE_NAME);
 
       const cleanedWorkspaceName = cleanName(workspaceName);
       
@@ -34,18 +38,17 @@ class WorkspaceManager {
 
       const config = await loadConfig();
 
-      if (config.workspaces.find(ws => ws.name === cleanedWorkspaceName))
-        return { success: false, message: `Workspace "${cleanedWorkspaceName}" already exists` };
-
-      let profile;
-
       if (profileName) {
         profile = config.profiles.find(p => p.name === cleanName(profileName));
-
         if (!profile) {
-          return { success: false, message: `Profile "${profileName}" does not exist. Add a new profile with: pt profile add <profile>` };
+          throw new BusinessError(PROFILE_ERROR.PROFILE_NOT_FOUND);
         }
+      } else {
+        profile = config.getActiveProfile();
       }
+
+      if (profile.workspaces.find(ws => ws.name === cleanedWorkspaceName))
+        throw new BusinessError(WORKSPACE_ERROR.ALREADY_EXISTS);
 
       if (workspacePath) {
         await fs.ensureDir(workspacePath);
@@ -59,13 +62,10 @@ class WorkspaceManager {
         path: workspacePath
       });
       
-      config.addWorkspace(newWorkspace, profile);
+      profile.addWorkspace(newWorkspace);
       await saveConfig(config);
 
-      return { 
-        success: true,
-        workspaceName: cleanedWorkspaceName
-      };
+      return cleanedWorkspaceName;
     } catch (error) {
       throw error;
     }
@@ -73,59 +73,53 @@ class WorkspaceManager {
 
   /**
    * List all workspaces
-   * @param {boolean} showAll - Option to show all workspaces
-   * @returns {Array} Array of workspace objects with active status
+   * @param {{all: boolean|undefined}} options - List workspace options
+   * @returns {Array<Workspace|Profile>} Array of workspace objects
    */
-  async listWorkspaces(showAll) {
+  async listWorkspaces(options) {
     try {
       const config = await loadConfig();
+      if (options.all) return config.profiles.flat();
 
-      if (showAll) {
-        return {
-          workspaces: config.workspaces,
-          message: `\nAll available workspaces :`
-        };
-      }
-
-      return {
-        workspaces: config.workspaces.filter(ws => ws.profile === config.activeProfile),
-        message: `\nAvailable workspaces in ${config.activeProfile} profile:`
-      };
+      const profile = config.getActiveProfile();
+      return profile.workspaces;
     } catch (error) {
       throw error;
     }
   }
 
   /**
-   * Remove a specific workspace
+   * Remove a specific workspace from the active profile
    * @param {string} workspaceName - Name of the workspace to remove
-   * @returns {Object} Result object with success status and message
+   * @param {{profile: string|undefined}} options - Remove workspace options
+   * @returns {string} The cleaned workspace name
    */
-  async removeWorkspace(workspaceName) {
+  async removeWorkspace(workspaceName, options) {
     try {
-      if (!workspaceName || workspaceName.trim() === '') {
-        return { success: false, message: 'Workspace name cannot be empty' };
-      }
+      const profileName = options.profile;
+      let profile;
 
-      const cleanedName = cleanName(workspaceName);
+      if (!workspaceName || workspaceName.trim() === '') 
+        throw new BusinessError(WORKSPACE_ERROR.EMPTY_NAME);
+
+      const cleanedWorkspaceName = cleanName(workspaceName);
       const config = await loadConfig();
 
-      if (!config.workspaces.find(workspace => workspace.name === cleanedName)) {
-        return { success: false, message: `Workspace "${cleanedName}" does not exist` };
-      } else {
-        const workspaces = config.workspaces;
-        const index = workspaces.findIndex(workspaces => workspaces.name === cleanedName);
-
-        if (index !== -1) {
-          config.workspaces.splice(index, 1);
+      if (profileName) {
+        profile = config.profiles.find(p => p.name === cleanName(profileName));
+        if (!profile) {
+          throw new BusinessError(PROFILE_ERROR.PROFILE_NOT_FOUND);
         }
+      } else {
+        profile = config.getActiveProfile();
+      }
 
+      if (!profile.workspaces.find(workspace => workspace.name === cleanedWorkspaceName)) {
+        throw new BusinessError(WORKSPACE_ERROR.NOT_FOUND);
+      } else {
+        profile.removeWorkspace(cleanedWorkspaceName);
         await saveConfig(config);
-
-        return {
-          success: true,
-          removedWorkspace: cleanedName
-        };
+        return cleanedWorkspaceName;
       }
     } catch (error) {
       throw error;
