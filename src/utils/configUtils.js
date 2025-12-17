@@ -14,7 +14,7 @@ let cacheTimestamp = null;
 
 // Default configuration
 export const DEFAULT_CONFIG = new Config({
-  appVersion: '0.1.8',
+  appVersion: '0.1.2',
   firstTimeSetup: false,
   settings: new Settings({
     defaultProjectsPath: path.join(os.homedir(), 'Dev')
