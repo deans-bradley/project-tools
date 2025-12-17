@@ -4,7 +4,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Node.js](https://img.shields.io/badge/Node.js->=22.14.0-green.svg)](https://nodejs.org/)
-[![Version](https://img.shields.io/badge/version-0.1.1-blue.svg)](https://github.com/deans-bradley/project-tools)
+[![Version](https://img.shields.io/badge/version-0.1.2-blue.svg)](https://github.com/deans-bradley/project-tools)
 
 ProjectTools (`pt`) is a command-line interface designed to streamline the management of development projects across different workspaces and profiles. Whether you're juggling multiple clients, working on different types of projects, or need to organize your development environment, ProjectTools provides the structure and flexibility you need.
 
@@ -18,15 +18,14 @@ ProjectTools (`pt`) is a command-line interface designed to streamline the manag
 
 ## Table of Contents
 
-- [Installation](#-installation)
-- [Quick Start](#-quick-start)
-- [Commands](#-commands)
-- [Configuration](#-configuration)
-- [Examples](#-examples)
-- [Development](#-development)
-- [Contributing](#-contributing)
-- [Changelog](#-changelog)
-- [License](#-license)
+- [Installation](#installation)
+- [Quick Start](#quick-start)
+- [Commands](#commands)
+- [Configuration](#configuration)
+- [Examples](#examples)
+- [Development](#development)
+- [Contributing](#contributing)
+- [License](#license)
 
 ## Installation
 
@@ -319,38 +318,6 @@ ProjectTools is built on the shoulders of excellent open-source libraries:
 - **[fs-extra](https://github.com/jprichardson/node-fs-extra)** (v11.3.0) - Enhanced file system methods for Node.js. Provides reliable cross-platform file operations for configuration management.
 
 Special thanks to the maintainers and contributors of these projects for making development more enjoyable and reliable.
-
-## Changelog
-
-### [0.1.1] - 2025-09-28
-
-#### Added
-- Initial release of ProjectTools CLI
-- Profile management system with create, list, switch, and remove operations
-- Workspace management with profile-scoped organization
-- Basic configuration management with settings persistence
-- Cross-platform configuration file handling
-- Colorful CLI output with chalk styling
-- Hello command for installation verification
-- Comprehensive help system
-
-#### Features
-- **Profiles**: Create and manage development contexts
-- **Workspaces**: Organize projects within profiles  
-- **Configuration**: Centralized settings management
-- **CLI Framework**: Built with Commander.js for robust command handling
-
-#### Technical
-- Node.js >= 22.14.0 requirement
-- ES modules architecture
-- JSON-based configuration storage
-- Cross-platform file system operations
-
-#### Coming Soon
-- Project management features
-- Enhanced workspace operations
-- Project templates and scaffolding
-- Integration with popular development tools
 
 ## License
 

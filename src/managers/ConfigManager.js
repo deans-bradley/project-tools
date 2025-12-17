@@ -26,25 +26,34 @@ class ConfigManager {
         console.log(chalk.gray('   You can change this later with: pt config set default-path <path>'));
       }
     } catch (error) {
-      console.error(chalk.red('Error initializing ProjectTools:'), error.message);
-      process.exit(1);
+      throw error;
     }
   }
 
   /**
    * Load configuration from file
-   * @returns {Object} Configuration object
+   * @returns {Config} Configuration object
    */
   async loadConfig() {
-    return await loadConfig();
+    try {
+      return await loadConfig();
+    }
+    catch (error) {
+      throw error;
+    }
   }
 
   /**
    * Save configuration to file
-   * @param {Object} config - Configuration object to save
+   * @param {Config} config - Configuration object to save
    */
   async saveConfig(config) {
-    return await saveConfig(config);
+    try {
+      return await saveConfig(config);
+    }
+    catch (error) {
+      throw error;
+    }
   }
 
   /**
@@ -57,8 +66,7 @@ class ConfigManager {
       const config = await loadConfig();
       return config.settings?.[key];
     } catch (error) {
-      console.error(chalk.red('Error getting setting:'), error.message);
-      return null;
+      throw error;
     }
   }
 
@@ -66,23 +74,20 @@ class ConfigManager {
    * Set a configuration setting
    * @param {string} key - Setting key
    * @param {any} value - Setting value
-   * @returns {Object} Result object with success status
+   * @returns {Promise<void>}
    */
   async setSetting(key, value) {
     try {
       const config = await loadConfig();
       
-      // Ensure settings object exists
       if (!config.settings) {
         config.settings = {};
       }
       
       config.settings[key] = value;
-      const success = await saveConfig(config);
-      
-      return { success };
+      await saveConfig(config);
     } catch (error) {
-      return { success: false, message: error.message };
+      throw error;
     }
   }
 
@@ -91,14 +96,19 @@ class ConfigManager {
    * @returns {string} Default projects path
    */
   async getDefaultProjectsPath() {
-    const defaultPath = await this.getSetting('defaultProjectsPath');
-    return defaultPath || path.join(os.homedir(), 'Dev');
+    try {
+      const defaultPath = await this.getSetting('defaultProjectsPath');
+      return defaultPath || path.join(os.homedir(), 'Dev');
+    }
+    catch (error) {
+      throw error;
+    }
   }
 
   /**
    * Set the default projects path
    * @param {string} projectsPath - New default projects path
-   * @returns {Object} Result object with success status
+   * @returns {Promise<void>} Result object with success status
    */
   async setDefaultProjectsPath(projectsPath) {
     try {
@@ -107,13 +117,10 @@ class ConfigManager {
         ? path.join(os.homedir(), projectsPath.slice(1))
         : path.resolve(projectsPath);
 
-      // Ensure the directory exists
       await fs.ensureDir(resolvedPath);
-
-      const result = await this.setSetting('defaultProjectsPath', resolvedPath);
-      return result;
+      await this.setSetting('defaultProjectsPath', resolvedPath);
     } catch (error) {
-      return { success: false, message: error.message };
+      throw error;
     }
   }
 
@@ -122,7 +129,12 @@ class ConfigManager {
    * @returns {string} Path to configuration file
    */
   getConfigPath() {
-    return getConfigPath();
+    try {
+      return getConfigPath();
+    }
+    catch (error) {
+      throw error;
+    }
   }
 }
 
