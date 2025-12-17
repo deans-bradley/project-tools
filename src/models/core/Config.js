@@ -20,7 +20,7 @@ class Config extends Base {
     const now = new Date().toISOString();
     super(data.createdDate || now, data.modifiedDate || now);
     
-    this.appVersion = data.appVersion || "0.1.1";
+    this.appVersion = data.appVersion || "0.1.8";
     this.firstTimeSetup = data.firstTimeSetup ?? true;
     this.settings = new Settings(data.settings || {});
     this.profiles = data.profiles ? Profile.fromJSONArray(data.profiles) : [];
