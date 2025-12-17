@@ -1,5 +1,6 @@
-import { Base, Workspace } from '../index.js';
+import { Base, BusinessError, Workspace } from '../index.js';
 import { generateId } from '../../utils/commonUtils.js';
+import { WORKSPACE_ERROR } from '../constants/index.js';
 
 /**
  * @typedef {Object} ProfileData
@@ -21,9 +22,13 @@ class Profile extends Base {
     const now = new Date().toISOString();
     super(data.createdDate || now, data.modifiedDate || now);
     
+    /** @type {string} */
     this.id = data.id || generateId('prof');
+    /** @type {string} */
     this.name = data.name;
+    /** @type {boolean} */
     this.isActive = data.isActive || false;
+    /** @type {Array<Workspace>} */
     this.workspaces = data.workspaces ? Workspace.fromJSONArray(data.workspaces) : [];
   }
 
@@ -66,6 +71,19 @@ class Profile extends Base {
     this.touch();
   }
 
+  /**
+   * Remove a workspace from the current profile by the workspace name
+   * @param {string} workspaceName - The name of the workspace to be removed
+   */
+  removeWorkspace(workspaceName) {
+    const index = this.workspaces.findIndex(ws => ws.name === workspaceName);
+    if (index === -1) {
+      throw new BusinessError(WORKSPACE_ERROR.NOT_FOUND);
+    }
+    this.workspaces.splice(index, 1);
+    this.touch();
+  }
+ 
   /**
    * Convert to plain JSON object for serialization
    * @returns {ProfileData} Plain object representation
