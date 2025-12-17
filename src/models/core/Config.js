@@ -61,9 +61,7 @@ class Config extends Base {
         newActiveProfile.touch();
       }
       this.touch();
-      return true;
     }
-    return false;
   }
 
   /**
