@@ -1,5 +1,5 @@
-import { generateId } from '../../util/index';
-import { Base, Project } from './index';
+import { generateId } from '../../utils/commonUtils';
+import { Base, Project } from '../index';
 
 /**
  * Workspace class for development workspaces
