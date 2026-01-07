@@ -1,5 +1,5 @@
-import { generateId } from '../../util/index';
-import { Base } from './index';
+import { generateId } from '../../utils/commonUtils';
+import { Base } from '../index';
 
 class Project extends Base {
   readonly id: string;
