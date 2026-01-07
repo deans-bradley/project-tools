@@ -1,5 +1,5 @@
-import { generateId } from '../../util/index';
-import { Base, Workspace } from './index';
+import { generateId } from '../../utils/commonUtils';
+import { Base, Workspace } from '../index';
 
 /**
  * Profile class for user profiles
