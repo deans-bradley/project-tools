@@ -30,10 +30,10 @@ class BusinessError extends Error {
   readonly domain: number;
   readonly domainName: string;
   readonly baseType: number;
-  readonly originalError: Error | undefined;
+  readonly originalError: Error | undefined | null;
   readonly context: ErrorContext;
 
-  constructor(code: number, message?: string, originalError?: Error, context?: ErrorContext) {
+  constructor(code: number, message?: string | null, originalError?: Error, context?: ErrorContext) {
     // Extract domain and base type from code
     const domain = Math.floor(code / 100) * 100;
     const baseType = code % 100;
