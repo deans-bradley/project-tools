@@ -1,5 +1,5 @@
 import fs from 'fs-extra';
-import { Base } from './index';
+import { Base } from '../index';
 
 /**
  * Settings class for user settings and preferences
