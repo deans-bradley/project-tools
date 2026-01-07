@@ -1,5 +1,5 @@
 import { version } from '../../../package.json';
-import { Base, Settings } from './index';
+import { Base, Settings } from '../index';
 
 interface ConfigData {
   appVersion?: string;
