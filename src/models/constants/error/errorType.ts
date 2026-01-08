@@ -13,7 +13,7 @@ export const ERROR_TYPE = {
   INVALID_FORMAT: 21,
   INVALID_VALUE: 22,
   VALIDATION_FAILED: 23,
-  
+
   // I/O errors (40-59)
   READ_ERROR: 40,
   WRITE_ERROR: 41,
@@ -34,8 +34,8 @@ export const ERROR_TYPE = {
 /**
  * Creates a domain-specific error code
  */
-function createErrorCode(domainError: number, errorType: number) {
-  return domainError + errorType;
+function createErrorCode(domainError: number, errorType: number): string {
+  return `${domainError}:${errorType}`;
 }
 
 export type ErrorType = typeof ERROR_TYPE[keyof typeof ERROR_TYPE];
