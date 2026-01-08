@@ -16,7 +16,7 @@ class Settings extends Base {
     try {
       await fs.ensureDir(path);
     } catch (error) {
-      throw error; // TODO: Throw custom Error
+      throw error;
     }
     this.defaultPath = path;
     this.touch();
