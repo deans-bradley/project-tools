@@ -1,17 +1,15 @@
-import { createErrorCode, createErrorMessage, ErrorDomain, ErrorType } from "../constants";
+import { createErrorCode, ErrorDomain, ErrorType } from "../constants";
 
 class BusinessError extends Error {
+  override readonly name: string;
   readonly errorCode: string;
   readonly errorDomain: ErrorDomain;
   readonly errorType: ErrorType;
 
-  constructor(errorDomain: ErrorDomain, errorType: ErrorType, context: string, message?: string) {
+  constructor(errorDomain: ErrorDomain, errorType: ErrorType, message?: string) {
     const errorCode = createErrorCode(errorDomain, errorType);
-    if (!message) {
-      message = createErrorMessage(errorType, context);
-    }
-
     super(message || `An error occured with code: ${errorCode}`);
+    this.name = this.constructor.name;
     this.errorCode = errorCode;
     this.errorDomain = errorDomain;
     this.errorType = errorType;
