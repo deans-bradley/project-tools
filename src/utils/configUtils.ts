@@ -1,8 +1,8 @@
 import fs from 'fs-extra';
 import os from 'os';
 import path from 'path';
-import { ERROR_TYPE } from '../models/constants/index';
-import { BusinessError, Config, ConfigError, Settings } from '../models/index';
+import { ERROR_DOMAIN } from '../models/constants/index';
+import { AccessToResourceDeniedError, BusinessError, Config, DiskFullError, InitializationFailedError, InvalidJsonError, InvalidValueError, ResourceNotFoundError, RestoreFailedError, Settings, WriteError } from '../models/index';
 
 // Configuration file path - shared across the application
 export const CONFIG_PATH = path.join(os.homedir(), '.projecttools', 'config.json');
@@ -37,20 +37,17 @@ export async function loadConfig(forceReload: boolean = false): Promise<Config> 
     
     return config;
   } catch (error: any) {
-    if (error instanceof BusinessError) {
-      throw error;
-    }
     if (error.code === 'ENOENT') {
-      throw new ConfigError(ERROR_TYPE.NOT_FOUND);
+      throw new ResourceNotFoundError(ERROR_DOMAIN.CONFIG, 'configuration file');
     }
     if (error.code === 'EACCES') {
-      throw new ConfigError(ERROR_TYPE.ACCESS_DENIED);
+      throw new AccessToResourceDeniedError(ERROR_DOMAIN.CONFIG, 'configuration file');
     }
     if (error.name === 'SyntaxError') {
-      throw new ConfigError(ERROR_TYPE.INVALID_JSON);
+      throw new InvalidJsonError(ERROR_DOMAIN.CONFIG, 'configuration');
     }
 
-    throw new ConfigError(ERROR_TYPE.READ_ERROR);
+    throw error;
   }
 }
 
@@ -59,10 +56,6 @@ export async function loadConfig(forceReload: boolean = false): Promise<Config> 
  * @throws {BusinessError} When configuration cannot be saved
  */
 export async function saveConfig(config: Config): Promise<void> {
-  if (!(config instanceof Config)) {
-    throw new ConfigError(ERROR_TYPE.INVALID_VALUE);
-  }
-
   try {
     await fs.ensureDir(path.dirname(CONFIG_PATH));
 
@@ -86,17 +79,14 @@ export async function saveConfig(config: Config): Promise<void> {
     cacheTimestamp = new Date();
     
   } catch (error: any) {
-    if (error instanceof ConfigError) {
-      throw error;
-    }
     if (error.code === 'EACCES') {
-      throw new ConfigError(ERROR_TYPE.ACCESS_DENIED);
+      throw new AccessToResourceDeniedError(ERROR_DOMAIN.CONFIG, 'configuration file');
     }
     if (error.code === 'ENOSPC') {
-      throw new ConfigError(ERROR_TYPE.DISK_FULL);
+      throw new DiskFullError(ERROR_DOMAIN.CONFIG, 'configuration');
     }
 
-    throw new ConfigError(ERROR_TYPE.WRITE_ERROR);
+    throw new WriteError(ERROR_DOMAIN.CONFIG, 'configuration');
   }
 }
 
@@ -114,7 +104,7 @@ export async function initConfig(): Promise<boolean> {
     try {
       await loadConfig(true);
     } catch (error: any) {
-      throw new ConfigError(ERROR_TYPE.VALIDATION_FAILED);
+      throw new InvalidValueError(ERROR_DOMAIN.CONFIG, 'configuration', 'configuration file');
     }
     
     return false;
@@ -123,10 +113,10 @@ export async function initConfig(): Promise<boolean> {
       throw error;
     }
     if (error.code === 'EACCES') {
-      throw new ConfigError(ERROR_TYPE.ACCESS_DENIED);
+      throw new AccessToResourceDeniedError(ERROR_DOMAIN.CONFIG, 'configuration file');
     }
 
-    throw new ConfigError(ERROR_TYPE.INITIALIZATION_FAILED);
+    throw new InitializationFailedError(ERROR_DOMAIN.CONFIG, 'configuration');
   }
 }
 
@@ -165,10 +155,7 @@ export async function restoreFromBackup(): Promise<boolean> {
     
     return true;
   } catch (error: any) {
-    if (error instanceof ConfigError) {
-      throw error;
-    }
-    throw new ConfigError(ERROR_TYPE.RESTORE_FAILED);
+    throw new RestoreFailedError(ERROR_DOMAIN.CONFIG, 'configuration');
   }
 }
 
