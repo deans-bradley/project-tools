@@ -11,19 +11,7 @@ import { version } from '../package.json';
  * It sets up the commander.js program and registers all available commands.
  */
 
-// import { setupConfigCommands } from '../src/commands/configCommands.js';
-// import { setupProfileCommands } from '../src/commands/profileCommands.js';
-// import { setupProjectCommands } from '../src/commands/projectCommands.js';
-// import { setupWorkspaceCommands } from '../src/commands/workspaceCommands.js';
-// import ConfigManager from '../src/managers/ConfigManager.js';
-// import ProfileManager from '../src/managers/ProfileManager.js';
-// import ProjectManager from '../src/managers/ProjectManager.js';
-// import WorkspaceManager from '../src/managers/WorkspaceManager.js';
-
-// const configManager = new ConfigManager();
-// const profileManager = new ProfileManager();
-// const projectManager = new ProjectManager();
-// const workspaceManager = new WorkspaceManager();
+import { setupConfigCommands } from './commands/index';
 
 program
   .name('pt')
@@ -43,7 +31,7 @@ program.action(() => {
   console.log('Use --help to see available commands.');
 });
 
-// setupConfigCommands(program, configManager);
+setupConfigCommands(program);
 // setupProfileCommands(program, profileManager);
 // setupProjectCommands(program, projectManager);
 // setupWorkspaceCommands(program, workspaceManager);
