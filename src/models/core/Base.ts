@@ -2,7 +2,7 @@
  * Base class for auditable objects
  */
 class Base {
-  readonly createdDate: Date;
+  createdDate: Date;
   modifiedDate: Date;
 
   constructor(createdDate?: Date, modifiedDate?: Date) {
