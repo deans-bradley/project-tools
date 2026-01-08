@@ -1,0 +1,2 @@
+export { setupConfigCommands } from './configCommands';
+
