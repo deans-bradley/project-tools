@@ -40,6 +40,35 @@ class Config extends Base {
     }
   }
 
+  /**
+   * Returns the current active profile
+   * @returns The active profile
+   */
+  getActiveProfile(): Profile {
+    const activeProfile = this.profiles.find(p => p.isActive === true);
+
+    if (!activeProfile) {
+      throw new ResourceNotFoundError(ERROR_DOMAIN.PROFILE, "", "Could not find active profile");
+    }
+
+    return activeProfile;
+  }
+
+  /**
+   * Sets the active profile
+   * @param profileId
+   * @returns 
+   */
+  setActiveProfile(profileId: string): void {
+    const profile = this.profiles.find(p => p.id === profileId);
+
+    if (!profile) {
+      throw new ResourceNotFoundError(ERROR_DOMAIN.PROFILE, "", `Could not find profile with ID ${profileId}`);
+    }
+
+    profile.isActive = true;
+  }
+
   static fromJSON(data: ConfigData): Config {
     const settings = new Settings(data.settings.defaultPath);
     const config = new Config(settings);
