@@ -2,7 +2,8 @@ import chalk from "chalk";
 import fs from 'fs-extra';
 import os from 'os';
 import path from "path";
-import { Config, Settings } from "../models";
+import { Config, ResourceNotFoundError, Settings } from "../models";
+import { ERROR_DOMAIN, SETTINGS, SETTINGS_KEY } from "../models/constants";
 import { getConfigPath, initConfig, loadConfig, saveConfig } from "../utils/configUtils";
 
 /**
@@ -61,7 +62,11 @@ class ConfigManager {
   async getSetting(key: string): Promise<any> {
     try {
       const config = await loadConfig();
-      return config.settings?.[key as keyof typeof config.settings];
+      const prop = SETTINGS.get(key);
+      if (!prop) {
+        throw new ResourceNotFoundError(ERROR_DOMAIN.CONFIG, "", `Unknown setting key: ${key}`);
+      }
+      return config.settings?.[prop as keyof typeof config.settings];
     } catch (error) {
       throw error;
     }
@@ -73,12 +78,25 @@ class ConfigManager {
   async setSetting(key: string, value: any): Promise<void> {
     try {
       const config = await loadConfig();
-      
+
+      let settingValue = value;
+
+      if (key === SETTINGS_KEY.DEFAULT_PATH) {
+        settingValue = path.resolve(value);
+        await fs.ensureDir(settingValue);
+      }
+
+      const prop = SETTINGS.get(key);
+
+      if (!prop) {
+        throw new ResourceNotFoundError(ERROR_DOMAIN.CONFIG, "", `Unknown setting key: ${key}`);
+      }
+
       if (!config.settings) {
         config.settings = new Settings(path.join(os.homedir(), 'Dev'));
       }
       
-      (config.settings as any)[key] = value;
+      (config.settings as any)[prop] = settingValue;
       await saveConfig(config);
     } catch (error) {
       throw error;
@@ -88,9 +106,9 @@ class ConfigManager {
   /**
    * Get the default projects path
    */
-  async getDefaultProjectsPath(): Promise<string> {
+  async getDefaultPath(): Promise<string> {
     try {
-      const defaultPath = await this.getSetting('defaultProjectsPath');
+      const defaultPath = await this.getSetting(SETTINGS_KEY.DEFAULT_PATH);
       return defaultPath || path.join(os.homedir(), 'Dev');
     }
     catch (error) {
@@ -101,15 +119,10 @@ class ConfigManager {
   /**
    * Set the default projects path
    */
-  async setDefaultProjectsPath(projectsPath: string): Promise<void> {
+  async setDefaultPath(projectsPath: string): Promise<void> {
     try {
-      // Resolve the path (handle ~ and relative paths)
-      const resolvedPath = projectsPath.startsWith('~') 
-        ? path.join(os.homedir(), projectsPath.slice(1))
-        : path.resolve(projectsPath);
-
-      await fs.ensureDir(resolvedPath);
-      await this.setSetting('defaultProjectsPath', resolvedPath);
+      await fs.ensureDir(projectsPath);
+      await this.setSetting(SETTINGS_KEY.DEFAULT_PATH, projectsPath);
     } catch (error) {
       throw error;
     }
