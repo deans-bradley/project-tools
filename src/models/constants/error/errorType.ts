@@ -7,6 +7,7 @@ export const ERROR_TYPE = {
   NOT_FOUND: 1,
   ALREADY_EXISTS: 2,
   ACCESS_DENIED: 3,
+  ALREADY_ACTIVE: 4,
   
   // Validation errors (20-39)
   EMPTY_REQUIRED_FIELD: 20,
