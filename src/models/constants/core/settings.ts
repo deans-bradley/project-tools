@@ -7,13 +7,10 @@ export const SETTINGS_KEY = {
 } as const;
 
 /**
- * Settings Keys Display Names
- * Human-readable names for settings keys
+ * Settings VALUES Map
+ * Maps settings keys to their config property name
  */
-export const SETTINGS_KEY_NAME = {
-  [SETTINGS_KEY.DEFAULT_PATH]: "Default path"
-} as const;
-
-export type SettingsKey = typeof SETTINGS_KEY[keyof typeof SETTINGS_KEY];
-export type SettingsKeyName = typeof SETTINGS_KEY_NAME[keyof typeof SETTINGS_KEY_NAME];
+export const SETTINGS = new Map<string, string>([
+  [SETTINGS_KEY.DEFAULT_PATH, "defaultPath"]
+]);
 
