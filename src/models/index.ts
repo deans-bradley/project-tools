@@ -18,6 +18,7 @@ export { InvalidJsonError } from './error/InvalidJsonError';
 export { InvalidValueError } from './error/InvalidValueError';
 export { OperationFailedError } from './error/OperationFailedError';
 export { ReadError } from './error/ReadError';
+export { ResourceAlreadyActiveError } from './error/ResourceAlreadyActive';
 export { ResourceAlreadyExistsError } from './error/ResourceAlreadyExistsError';
 export { ResourceNotFoundError } from './error/ResourceNotFoundError';
 export { RestoreFailedError } from './error/RestoreFailedError';
