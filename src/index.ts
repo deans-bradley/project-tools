@@ -11,7 +11,7 @@ import { version } from '../package.json';
  * It sets up the commander.js program and registers all available commands.
  */
 
-import { setupConfigCommands } from './commands/index';
+import { setupConfigCommands, setupProfileCommands, setupWorkspaceCommands } from './commands/index';
 
 program
   .name('pt')
@@ -32,9 +32,9 @@ program.action(() => {
 });
 
 setupConfigCommands(program);
-// setupProfileCommands(program, profileManager);
+setupProfileCommands(program);
+setupWorkspaceCommands(program);
 // setupProjectCommands(program, projectManager);
-// setupWorkspaceCommands(program, workspaceManager);
 
 program.parse(process.argv);
 
