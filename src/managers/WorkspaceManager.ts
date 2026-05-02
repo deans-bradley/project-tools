@@ -74,10 +74,8 @@ export class WorkspaceManager {
         workspacePath = `${config.settings.defaultPath}/${profile.name}/${cleanedWorkspaceName}`;
         await fs.ensureDir(workspacePath);
       }
-
-      const newWorkspace = new Workspace(cleanedWorkspaceName, workspacePath);
       
-      profile.addWorkspace(newWorkspace);
+      profile.addWorkspace(new Workspace(cleanedWorkspaceName, workspacePath));
       await saveConfig(config);
 
       return cleanedWorkspaceName;
