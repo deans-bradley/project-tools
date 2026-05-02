@@ -1,6 +1,6 @@
 {
   "name": "projecttools",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "A powerful CLI tool for managing development projects across multiple workspaces and profiles",
   "bin": {
     "pt": "./bin/pt"
