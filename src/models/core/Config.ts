@@ -1,6 +1,6 @@
 import { version } from '../../../package.json';
 import { ERROR_DOMAIN } from '../constants';
-import { Base, Profile, ResourceNotFoundError, Settings } from '../index';
+import { Base, Profile, Project, ResourceNotFoundError, Settings, Workspace } from '../index';
 import { ConfigData } from './interfaces/ConfigData';
 
 /**
@@ -73,7 +73,18 @@ class Config extends Base {
     const settings = new Settings(data.settings.defaultPath);
     const config = new Config(settings);
     
-    config.profiles = data.profiles;
+    config.profiles = (data.profiles || []).map((p: any) => {
+      const workspaces = (p.workspaces || []).map((ws: any) => {
+        const projects = (ws.projects || []).map((proj: any) => {
+          const project = new Project(proj.name, proj.path, proj.tags || []);
+          return project;
+        });
+        const workspace = new Workspace(ws.name, ws.path, projects);
+        return workspace;
+      });
+      const profile = new Profile(p.name, p.isActive, workspaces);
+      return profile;
+    });
     config.createdDate = data.createdDate;
     config.modifiedDate = data.modifiedDate;
     
