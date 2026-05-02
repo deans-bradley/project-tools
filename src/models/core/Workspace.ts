@@ -17,6 +17,14 @@ class Workspace extends Base {
     this.path = path;
     this.projects = projects || [];
   }
+
+  /**
+   * Adds a new project to the workspace
+   * @param project
+   */
+  addProject(project: Project) {
+    this.projects.push(project);
+  }
 }
 
 export { Workspace };
